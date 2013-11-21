@@ -1,6 +1,11 @@
 <?php
 	require_once dirname( __FILE__ ) . '/inc/controller.class.php';
 
+	function pOST($key, $default = '') {
+		if (isset($_POST[$key])) return $_POST[$key];
+		return $default;
+	}
+
 	$controller = new Controller();
 	$password = !empty ($_REQUEST['p']) ? $_REQUEST['p'] : '';
 
@@ -31,7 +36,7 @@
 		elseif( !empty( $_POST ) )
 		{
 			// new post submission
-			$controller->post( $_POST['data'], $_POST['syn'], $_POST['ttl'], $_POST['p'], $_POST['cipher'] );
+			$controller->post( pOST('data'), pOST('syn'), pOST('ttl'), pOST('p'), pOST('cipher', 'AES-256-OFB') );
 		}
 		else
 		{
@@ -41,7 +46,7 @@
 	elseif( !empty( $_POST ) )
 	{
 		// new post submission
-		$controller->post( $_POST['data'], $_POST['syn'], $_POST['ttl'], $_POST['p'], $_POST['cipher'] );
+		$controller->post( pOST('data'), pOST('syn'), pOST('ttl'), pOST('p'), pOST('cipher', 'AES-256-OFB') );
 	}
 	else
 	{

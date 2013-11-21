@@ -12,8 +12,49 @@
 
 
 $( function() {
+	var worker, worker_pending, worker_next_id, worker_send, worker_has_entropy = false;
+
+	if (typeof Worker !== 'undefined' && typeof window.ezcrypt_worker === 'undefined') {
+		worker = new Worker(window.ezcrypt_crypto_backend_url);
+		worker_pending = {};
+		worker_next_id = 0;
+		worker.onmessage = function (event) {
+			var data = event.data;
+			if (!data.id) return;
+			var obj = worker_pending[data.id];
+			if (!obj) return;
+			if (!data.hasOwnProperty('progress')) delete worker_pending[data.id];
+			obj(data.result, data.error, data.progress);
+		}
+		window.ezcrypt_backend.randomKey(function (key) {
+			worker.postMessage({id: 0, func: '_add_entropy', arguments: [key,128,'ezcrypt backend random'] });
+		});
+		worker_send = function (func, args, cb) {
+			if (!worker_has_entropy) {
+				var rnd;
+				if (window.sjcl && window.sjcl.random) {
+					rnd = window.sjcl.random.randomWords(16, 0);
+					worker.postMessage({id: 0, func: '_add_entropy', arguments: [rnd,32,'sjcl.random'] });
+				} else {
+					rnd = (Math.random()*4294967296) ^ 0;
+					worker.postMessage({id: 0, func: '_add_entropy', arguments: [rnd,1,'Math.random'] });
+				}
+			}
+			var id = ++worker_next_id;
+			worker_pending[id] = cb;
+			worker.postMessage({id: id, func: func, arguments: args});
+		}
+	} else {
+		worker_send = function (func, args, cb) {
+			try {
+				cb({ result: window.ezcrypt[func].apply(this, args) });
+			} catch (e) {
+				cb({ error: e });
+			}
+		}
+	}
+
 	var editor; // syntax highlighter
-	var encryptionInProgress = null; // used as flag state to determine if encryption is in mid-progress
 
 	var time_decryption = 0;
 	var timer_decrypted = null; // created after decryption to measure editor coloring
@@ -85,18 +126,25 @@ $( function() {
 		$( '#decrypting' ).show();
 		// start timer and decrypt
 		var t = new TimeDiff();
-		var output = window.ezcrypt_backend.decrypt( key, data, cipher );
-		// display duration
-		time_decryption = t.getDiff();
-		$( '#execute' ).html( 'decryption: ' + time_decryption + 'ms,');
+		window.ezcrypt.async_decrypt([key, data, cipher], function (output, error) {
+			if (output) {
+				// display duration
+				time_decryption = t.getDiff();
+				$( '#execute' ).html( 'decryption: ' + time_decryption + 'ms,');
 
-		$( '#wrapholder' ).show();
-		$( '.cm-s-default' ).parent().show();
-		$( '#decrypting' ).hide();
+				$( '#wrapholder' ).show();
+				$( '.cm-s-default' ).parent().show();
+				$( '#decrypting' ).hide();
 
-		timer_decrypted = new TimeDiff();
-		editor.setOption( 'mode', $( '#syntax' ).val() );
-		editor.setValue( output );
+				timer_decrypted = new TimeDiff();
+				editor.setOption( 'mode', $( '#syntax' ).val() );
+				editor.setValue( output );
+			}
+			else if (error) {
+				$( '#decrypting' ).hide();
+				alert(error);
+			}
+		})
 	}
 
 	// when a password is assigned to a paste
@@ -130,12 +178,38 @@ $( function() {
 		} );
 	}
 
-	function encrypt_update()
+	var _encrypt_finished = [];
+	var delayedEncryptionInProgress = null;
+	var encryptionInProgress = 0; // 0: not in progress; 1: in progress; 2: in progress, but don't use result, restart instead
+	var _encryptResult = false;
+
+	function encrypt_finished(cb)
 	{
+		if (delayedEncryptionInProgress || !_encryptResult) {
+			encrypt_update(cb);
+		}
+		else if (!encryptionInProgress) {
+			cb.apply(this, _encryptResult);
+		}
+		else {
+			if (cb) _encrypt_finished.push(cb);
+		}
+	}
+
+	function encrypt_update(cb)
+	{
+		_encryptResult = false;
+
 		/* remove delayed update timer */
-		if (encryptionInProgress != null) {
-			clearTimeout(encryptionInProgress);
-			encryptionInProgress = null;
+		if (delayedEncryptionInProgress != null) {
+			clearTimeout(delayedEncryptionInProgress);
+			delayedEncryptionInProgress = null;
+		}
+
+		if (encryptionInProgress) {
+			encryptionInProgress = 2;
+			if (cb) _encrypt_finished.push(cb);
+			return;
 		}
 
 		var key = $( '#new_key' ).val();
@@ -148,19 +222,40 @@ $( function() {
 
 		// start timer and encrypt
 		var t = new TimeDiff();
-		var encrypt = stringBreak( window.ezcrypt_backend.encrypt( key, text, cipher ), 96 );
-		$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
-		$( '#new_result' ).val(encrypt);
+		window.ezcrypt.async_encrypt([key, text, cipher], function (result, error, progress) {
+			if (!progress) {
+				if (2 == encryptionInProgress) {
+					/* restart */
+					encryptionInProgress = 0;
+					encrypt_update();
+					return;
+				}
+				else {
+					encryptionInProgress = 0;
+				}
+			}
 
-		return encrypt;
+			if (result) {
+				result = stringBreak(result, 96);
+
+				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
+				$( '#new_result' ).val(result);
+			}
+
+			var i, len, l = progress ? _encrypt_finished.slice() : _encrypt_finished.splice(0);
+			_encryptResult = [result, error, progress];
+			for (i = 0, len = l.length; i < len; ++i) {
+				l[i].call(this, _encryptResult);
+			}
+		});
 	}
 
 	/* reset timer for delayed update */
 	function encrypt_update_delayed()
 	{
-		if( encryptionInProgress != null ) { clearTimeout( encryptionInProgress ); encryptionInProgress = null; }
-		encryptionInProgress = setTimeout( function() {
-			encryptionInProgress = null;
+		if( delayedEncryptionInProgress != null ) { clearTimeout( delayedEncryptionInProgress ); delayedEncryptionInProgress = null; }
+		delayedEncryptionInProgress = setTimeout( function() {
+			delayedEncryptionInProgress = null;
 			encrypt_update();
 		}, 500 );
 	}
@@ -174,18 +269,9 @@ $( function() {
 
 		var key = $( '#new_key' ).val();
 		var cipher = $( '#new_cipher' ).val();
+		var ttl = $( '#new_ttl' ).val();
+		var syntax = $( '#new_syntax' ).val();
 
-		/* update encrypted text now if either update is pending or no result available */
-		if( encryptionInProgress != null || $( '#new_result' ).val() == '' )
-		{
-			encrypt_update();
-		}
-
-		$( '#en' ).unbind( 'mouseenter mouseleave' );
-		$( '#new_result' ).show();
-		$( '#new_encrypttime' ).show();
-
-		var data = $( '#new_result' ).val();
 		var password = '';
 		if( $( '#new_usepassword' ).is( ':checked' ) )
 		{
@@ -193,85 +279,92 @@ $( function() {
 			password = window.ezcrypt_backend.sha( $( '#new_typepassword' ).val() );
 		}
 
-		var ttl = $( '#new_ttl' ).val();
-		var syntax = $( '#new_syntax' ).val();
-		// if syntax is empty, try hidden element incase of clone feature
-		if( typeof( syntax ) == 'undefined' ) { syntax = $( '#syntax' ).val(); }
+		encrypt_finished(function (data) {
+			if (!data) return;
 
-		// send submission to server
-		$.ajax( {
-			url: document.baseURI,
-			type: 'POST',
-			dataType: 'json',
-			data: 'data=' + encodeURIComponent(data) + '&p=' + password + '&ttl=' + encodeURIComponent(ttl) + '&syn=' + encodeURIComponent(syntax) + '&cipher=' + encodeURIComponent(cipher),
-			cache: false,
-			success: function( json ) {
-				if( ttl == -100 )
-				{
-					// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
-					// instead we simply mock the page and provide the url of the paste
-					
+			// send submission to server
+			$.ajax( {
+				url: document.baseURI,
+				type: 'POST',
+				dataType: 'json',
+				data: 'data=' + encodeURIComponent(data) + '&p=' + password + '&ttl=' + encodeURIComponent(ttl) + '&syn=' + encodeURIComponent(syntax) + '&cipher=' + encodeURIComponent(cipher),
+				cache: false,
+				success: function( json ) {
+					if( ttl == -100 )
+					{
+						// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
+						// instead we simply mock the page and provide the url of the paste
+						
+					}
+					else
+					{
+						var querypw = '';
+						if (password != '') querypw = '?p=' + password;
+						window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
+					}
+				},
+				error: function() {
+					enableHover();
+					alert( 'error submitting form' );
 				}
-				else
-				{
-					var querypw = '';
-					if (password != '') querypw = '?p=' + password;
-					window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
-				}
-			},
-			error: function() {
-				enableHover();
-				alert( 'error submitting form' );
-			}
-		} );
+			} );
+		})
 	}
 
+	window.ezcrypt = {
+		sha: window.ezcrypt_backend.sha,
+		encrypt: window.ezcrypt_backend.encrypt,
+		decrypt: window.ezcrypt_backend.decrypt,
+		async_encrypt: worker_send.bind(this, 'encrypt'),
+		async_decrypt: worker_send.bind(this, 'decrypt')
+	};
 
 	if( document.getElementById( 'content' ) )
 	{
 		// load up our editor
-		window.editor = editor = CodeMirror.fromTextArea( document.getElementById( 'content' ), {
+		window.ezcrypt.editor = editor = CodeMirror.fromTextArea( document.getElementById( 'content' ), {
 			lineNumbers: true,
 			matchBrackets: false,
 			lineWrapping: false,
 			readOnly: true,
 			onChange: onCodeChange
 		} );
-		
-		editor.setOption( 'mode', $( '#new_syntax' ).val() );
+
+		editor.setOption( 'mode', $( '#syntax' ).val() );
 		editor.focus();
 	}
 
 	/* wait until we have a key (may have to wait for some entropy from user inputs) */
-	window.ezcrypt_backend.randomKey(function (key) {
-		$( '#new_key' ).val( key );
-		var en = $('#en');
-		en.bind( 'click', submitData );
-		en.removeAttr( 'disabled' );
-		en.val( 'Submit' );
+	if ($( '#new_key' ).length) {
+		window.ezcrypt_backend.randomKey(function (key) {
+			$( '#new_key' ).val( key );
+			var en = $('#en');
+			en.bind( 'click', submitData );
+			en.removeAttr( 'disabled' );
+			en.val( 'Submit' );
 
-		var text = $( '#new_text' );
-		if ('' != text.val()) encrypt_update_delayed();
-		text.bind( 'textchange', encrypt_update_delayed );
+			var text = $( '#new_text' );
+			if ('' != text.val()) encrypt_update_delayed();
+			text.bind( 'textchange', encrypt_update_delayed );
 
-		// support ctrl+enter to send paste
-		text.live( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
+			// support ctrl+enter to send paste
+			text.live( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
 
-		// hover effect when moving mouse over submit button
-		en.hover(
-			function() {
-				$( '#new_result' ).show();
-				$( '#new_encrypttime' ).show();
-			},
-			function() {
-				$( '#new_result' ).hide();
-				$( '#new_encrypttime' ).hide();
-			}
-		);
-	});
+			// hover effect when moving mouse over submit button
+			en.hover(
+				function() {
+					$( '#new_result' ).show();
+					$( '#new_encrypttime' ).show();
+				},
+				function() {
+					$( '#new_result' ).hide();
+					$( '#new_encrypttime' ).hide();
+				}
+			);
+		});
+	}
 
 	$( '#new_usepassword' ).change( function() { if( this.checked ) { $( '#new_typepassword' ).show(); } else { $( '#new_typepassword' ).hide(); } } );
-
 
 	if ($( '#askpassword').length) {
 		/* want to show a paste */
@@ -305,10 +398,4 @@ $( function() {
 		decrypt_update();
 	}
 
-	window.ezcrypt = {
-		sha: window.ezcrypt_backend.sha,
-		encrypt: window.ezcrypt_backend.encrypt,
-		decrypt: window.ezcrypt_backend.decrypt,
-		editor: editor
-	}
 } );

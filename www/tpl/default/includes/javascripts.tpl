@@ -1,6 +1,8 @@
 <script type="text/javascript" src="jslibs/head-1.0.2-1.min.js"></script>
 <script type="text/javascript">
-	head.load("jslibs/crypto-backends/sjcl-8c0865fe3b6492a561a18d962ae48dc588abdbb7.min.js");
+	window.ezcrypt_crypto_backend_url = "jslibs/crypto-backends/sjcl-60de709a3ffc0ea8304487920d322a5a0b068b53.min.js";
+	head.load(window.ezcrypt_crypto_backend_url);
+
 	head.load(
 		"jslibs/jquery-1.7.1.min.js",
 		"jslibs/jquery.textchange.min.js",

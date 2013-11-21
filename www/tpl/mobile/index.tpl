@@ -3,6 +3,7 @@
 ?>
 
 	<script type="text/javascript">
+		var editor = ezcrypt.editor;
 		// welcome text that appears on home page encrypted with pidCrypt and crypto-js
 		// you can change this message but simply making a new encrypted text and decrypting
 		// it below

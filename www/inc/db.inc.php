@@ -32,11 +32,11 @@
 		return db_backend_get($db, (int) $id);
 	}
 
-	function db_add($data, $syntax, $ttl, $password = null)
+	function db_add($data, $syntax, $ttl, $password, $cipher)
 	{
 		$db = db_connection();
 
-		return db_backend_add($db, $data, $syntax, $ttl, $password);
+		return db_backend_add($db, $data, $syntax, $ttl, $password, $cipher);
 	}
 
 	function db_delete($id)

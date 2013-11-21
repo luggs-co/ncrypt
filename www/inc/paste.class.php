@@ -56,7 +56,7 @@
 			return EZCRYPT_DOES_NOT_EXIST;
 		}
 		
-		function add( $data, $syntax, $ttl, $password = null )
+		function add( $data, $syntax, $ttl, $password, $cipher )
 		{
 			if (!empty($password)) {
 				// create a salt that ensures crypt creates an md5 hash
@@ -68,7 +68,7 @@
 			}
 
 			// submit new paste to server
-			return db_add($data, $syntax, $ttl, $password);
+			return db_add($data, $syntax, $ttl, $password, $cipher);
 		}
 		
 		function validate_password( $password )
