@@ -48,6 +48,7 @@
 			$template->assign( 'paste_id', $id );
 			$template->assign( 'data', '' );
 			$template->assign( 'syntax', '' );
+			$template->assign( 'cipher', '' );
 			$template->assign( 'require_password', false );
 
 			// detect if any errors came through
@@ -85,6 +86,7 @@
 				$output = array(
 					'data' => $paste['data'],
 					'syntax' => $paste['syntax'],
+					'cipher' => $paste['cipher'],
 				);
 
 				$template->assign( 'meta_title', 'EZCrypt - Paste' );
@@ -112,7 +114,7 @@
 		}
 
 		/* only works with JSON format */
-		function post( $data, $syntax, $ttl, $password )
+		function post( $data, $syntax, $ttl, $password, $cipher )
 		{
 			$template = $this->template;
 
@@ -124,7 +126,7 @@
 			$pastes = new Paste();
 
 			// new post submission
-			$paste = $pastes->add( $data, $syntax, $ttl, $password );
+			$paste = $pastes->add( $data, $syntax, $ttl, $password, $cipher );
 
 			// return our new ID to the user
 			$output = array(

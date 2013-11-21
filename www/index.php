@@ -31,7 +31,7 @@
 		elseif( !empty( $_POST ) )
 		{
 			// new post submission
-			$controller->post( $_POST['data'], $_POST['syn'], $_POST['ttl'], $_POST['p'] );
+			$controller->post( $_POST['data'], $_POST['syn'], $_POST['ttl'], $_POST['p'], $_POST['cipher'] );
 		}
 		else
 		{
@@ -41,7 +41,7 @@
 	elseif( !empty( $_POST ) )
 	{
 		// new post submission
-		$controller->post( $_POST['data'], $_POST['syn'], $_POST['ttl'], $_POST['p'] );
+		$controller->post( $_POST['data'], $_POST['syn'], $_POST['ttl'], $_POST['p'], $_POST['cipher'] );
 	}
 	else
 	{

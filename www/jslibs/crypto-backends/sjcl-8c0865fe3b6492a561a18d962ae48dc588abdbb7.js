@@ -283,6 +283,122 @@ sjcl.cipher.aes.prototype = {
   }
 };
 
+/* sjcl/core/cbc.js */
+/** @fileOverview CBC mode implementation
+ *
+ * @author Emily Stark
+ * @author Mike Hamburg
+ * @author Dan Boneh
+ */
+
+if (sjcl.beware === undefined) {
+  sjcl.beware = {};
+}
+sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."
+] = function() {
+  /** @namespace
+   * Dangerous: CBC mode with PKCS#5 padding.
+   *
+   * @author Emily Stark
+   * @author Mike Hamburg
+   * @author Dan Boneh
+   */
+  sjcl.mode.cbc = {
+    /** The name of the mode.
+     * @constant
+     */
+    name: "cbc",
+    
+    /** Encrypt in CBC mode with PKCS#5 padding.
+     * @param {Object} prp The block cipher.  It must have a block size of 16 bytes.
+     * @param {bitArray} plaintext The plaintext data.
+     * @param {bitArray} iv The initialization value.
+     * @param {bitArray} [adata=[]] The authenticated data.  Must be empty.
+     * @return The encrypted data, an array of bytes.
+     * @throws {sjcl.exception.invalid} if the IV isn't exactly 128 bits, or if any adata is specified.
+     */
+    encrypt: function(prp, plaintext, iv, adata) {
+      if (adata && adata.length) {
+        throw new sjcl.exception.invalid("cbc can't authenticate data");
+      }
+      if (sjcl.bitArray.bitLength(iv) !== 128) {
+        throw new sjcl.exception.invalid("cbc iv must be 128 bits");
+      }
+      var i,
+          w = sjcl.bitArray,
+          xor = w._xor4,
+          bl = w.bitLength(plaintext),
+          bp = 0,
+          output = [];
+
+      if (bl&7) {
+        throw new sjcl.exception.invalid("pkcs#5 padding only works for multiples of a byte");
+      }
+    
+      for (i=0; bp+128 <= bl; i+=4, bp+=128) {
+        /* Encrypt a non-final block */
+        iv = prp.encrypt(xor(iv, plaintext.slice(i,i+4)));
+        output.splice(i,0,iv[0],iv[1],iv[2],iv[3]);
+      }
+      
+      /* Construct the pad. */
+      bl = (16 - ((bl >> 3) & 15)) * 0x1010101;
+
+      /* Pad and encrypt. */
+      iv = prp.encrypt(xor(iv,w.concat(plaintext,[bl,bl,bl,bl]).slice(i,i+4)));
+      output.splice(i,0,iv[0],iv[1],iv[2],iv[3]);
+      return output;
+    },
+    
+    /** Decrypt in CBC mode.
+     * @param {Object} prp The block cipher.  It must have a block size of 16 bytes.
+     * @param {bitArray} ciphertext The ciphertext data.
+     * @param {bitArray} iv The initialization value.
+     * @param {bitArray} [adata=[]] The authenticated data.  It must be empty.
+     * @return The decrypted data, an array of bytes.
+     * @throws {sjcl.exception.invalid} if the IV isn't exactly 128 bits, or if any adata is specified.
+     * @throws {sjcl.exception.corrupt} if if the message is corrupt.
+     */
+    decrypt: function(prp, ciphertext, iv, adata) {
+      if (adata && adata.length) {
+        throw new sjcl.exception.invalid("cbc can't authenticate data");
+      }
+      if (sjcl.bitArray.bitLength(iv) !== 128) {
+        throw new sjcl.exception.invalid("cbc iv must be 128 bits");
+      }
+      if ((sjcl.bitArray.bitLength(ciphertext) & 127) || !ciphertext.length) {
+        throw new sjcl.exception.corrupt("cbc ciphertext must be a positive multiple of the block size");
+      }
+      var i,
+          w = sjcl.bitArray,
+          xor = w._xor4,
+          bi, bo,
+          output = [];
+          
+      adata = adata || [];
+    
+      for (i=0; i<ciphertext.length; i+=4) {
+        bi = ciphertext.slice(i,i+4);
+        bo = xor(iv,prp.decrypt(bi));
+        output.splice(i,0,bo[0],bo[1],bo[2],bo[3]);
+        iv = bi;
+      }
+
+      /* check and remove the pad */
+      bi = output[i-1] & 255;
+      if (bi === 0 || bi > 16) {
+        throw new sjcl.exception.corrupt("pkcs#5 padding corrupt");
+      }
+      bo = bi * 0x1010101;
+      if (!w.equal(w.bitSlice([bo,bo,bo,bo], 0, bi*8),
+                   w.bitSlice(output, output.length*32 - bi*8, output.length*32))) {
+        throw new sjcl.exception.corrupt("pkcs#5 padding corrupt");
+      }
+
+      return w.bitSlice(output, 0, output.length*32 - bi*8);
+    }
+  };
+};
 /* sjcl/core/bitArray.js */
 /** @fileOverview Arrays of bits, encoded as arrays of Numbers.
  *
@@ -768,6 +884,202 @@ sjcl.misc.pbkdf2 = function (password, salt, count, length, Prff) {
   if (length) { out = b.clamp(out, length); }
 
   return out;
+};
+/* sjcl_md5.js */
+/** @fileOverview Javascript MD5 implementation.
+ *
+ * Based on the implementation in RFC 1321, and on the SJCL
+ * SHA-1 implementation.
+ *
+ * @author Brandon Smith
+ */
+
+/**
+ * Context for a MD5 operation in progress.
+ * @constructor
+ * @class MD5, 128 bits.
+ */
+sjcl.hash.md5 = function (hash) {
+  if (!this._T[0]) { this._precompute(); }
+  if (hash) {
+    this._h = hash._h.slice(0);
+    this._buffer = hash._buffer.slice(0);
+    this._length = hash._length;
+  } else {
+    this.reset();
+  }
+};
+
+/**
+ * Hash a string or an array of words.
+ * @static
+ * @param {bitArray|String} data the data to hash.
+ * @return {bitArray} The hash value, an array of 5 big-endian words.
+ */
+sjcl.hash.md5.hash = function (data) {
+  return (new sjcl.hash.md5()).update(data).finalize();
+};
+
+sjcl.hash.md5.prototype = {
+  /**
+   * The hash's block size, in bits.
+   * @constant
+   */
+  blockSize: 512,
+   
+  /**
+   * Reset the hash state.
+   * @return this
+   */
+  reset:function () {
+    this._h = this._init.slice(0);
+    this._buffer = [];
+    this._length = 0;
+    return this;
+  },
+  
+  /**
+   * Input several words to the hash.
+   * @param {bitArray|String} data the data to hash.
+   * @return this
+   */
+  update: function (data) {
+    if (typeof data === "string") {
+      data = sjcl.codec.utf8String.toBits(data);
+    }
+    var i, b = this._buffer = sjcl.bitArray.concat(this._buffer, data),
+        ol = this._length,
+        nl = this._length = ol + sjcl.bitArray.bitLength(data);
+    for (i = this.blockSize+ol & -this.blockSize; i <= nl;
+         i+= this.blockSize) {
+      this._block(b.splice(0,16), true);
+    }
+    return this;
+  },
+  
+  /**
+   * Complete hashing and output the hash value.
+   * @return {bitArray} The hash value, an array of 4 big-endian words.
+   */
+  finalize:function () {
+    var i, b = this._buffer, h = this._h;
+
+    // Round out and push the buffer
+    b = sjcl.bitArray.concat(b, [sjcl.bitArray.partial(1,1)]);
+    // Round out the buffer to a multiple of 16 words, less the 2 length words.
+    for (i = b.length + 2; i & 15; i++) {
+      b.push(0);
+    }
+
+    // append the length
+    b.push(this._length | 0);
+    b.push((this._length / 0x100000000)|0);
+
+    while (b.length) {
+      // b.length is passed to avoid swapping and reswapping length bytes
+      this._block(b.splice(0,16), b.length);
+    }
+
+    this.reset();
+    this._BS(h, 4);
+    return h;
+  },
+
+  /**
+   * The MD5 initialization vector.
+   * @private
+   */
+  _init:[0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476],
+
+  /**
+   * Byte swap
+   * @private
+   */
+  _BS:function(w, n) {
+    var i, x;
+    for (i=0; i<n; i++) {
+      x = w[i];
+      w[i] = (x>>>24) | (x>>8&0xff00) | ((x&0xff00)<<8) | ((x&0xff)<<24);
+    }
+  },
+  
+  /* Will be precomputed */
+  _T:[],
+  /*
+   * 0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
+   * 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
+   * 0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
+   * 0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
+   * 0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa,
+   * 0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
+   * 0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed,
+   * 0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
+   * 0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c,
+   * 0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,
+   * 0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05,
+   * 0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
+   * 0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039,
+   * 0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
+   * 0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
+   * 0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391
+   * @private
+   */
+  _precompute:function() {
+    var i;
+    for (i=0; i<64; i++) {
+      this._T[i] = ((0xffffffff+1) * Math.abs(Math.sin(i+1)))|0;
+    }
+  },
+
+  /**
+   * Perform one cycle of MD5.
+   * @param {bitArray} words one block of words.
+   * @private
+   */
+  _block:function (words, notlast) {  
+    var i, a, b, c, d,
+    w = words.slice(0),
+    h = this._h,
+    T = this._T;
+
+    a = h[0]; b = h[1]; c = h[2]; d = h[3];
+
+    this._BS(w, notlast?16:14);
+    for (i=0; i<64; i++) {
+      var f, x, s, t;
+      if (i < 32) {
+        if (i < 16) {
+          f = (b & c) | ((~b) & d);
+          x = i;
+          s = [7, 12, 17, 22];
+        } else {
+          f = (d & b) | ((~d) & c);
+          x = (5 * i + 1) % 16;
+          s = [5, 9, 14, 20];
+        }
+      } else {
+        if (i < 48) {
+          f = b ^ c ^ d;
+          x = (3 * i + 5) % 16;
+          s = [4, 11, 16, 23];
+        } else {
+          f = c ^ (b | (~d));
+          x = (7 * i) % 16;
+          s = [6, 10, 15, 21];
+        }
+      }
+      t = a + f + w[x] + T[i];
+      a = d;
+      d = c;
+      c = b;
+      b = (((t << s[i%4]) | (t >>> 32-s[i%4])) + b)|0;
+    }
+
+    h[0] += a;
+    h[1] += b;
+    h[2] += c;
+    h[3] += d;
+  }
 };
 /* sjcl/core/sha1.js */
 /** @fileOverview Javascript SHA-1 implementation.
@@ -1634,7 +1946,9 @@ sjcl.random = new sjcl.prng(6);
   }
 }());
 
-	function derive_key(key, iv) {
+sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity."]();
+
+	function aes_256_ofb_derive_key(key, iv) {
 		return sjcl.misc.pbkdf2(key, iv, 1, 256, function (password) { return new sjcl.misc.hmac(password, sjcl.hash.sha1); });
 	}
 
@@ -1666,21 +1980,77 @@ sjcl.random = new sjcl.prng(6);
 		return output;
 	}
 
+	function aes_256_ofb_decrypt(key, block) {
+		var data = sjcl.codec.base64.toBits(block);
+		var iv = data.splice(0, 4); /* extract 4 32-bit ints = 128 bits */
+		var aes = new sjcl.cipher.aes(aes_256_ofb_derive_key(key, iv));
+		return sjcl.codec.utf8String.fromBits(ofb(aes, data, iv));
+	}
+
+	function aes_256_ofb_encrypt(key, block) {
+		var data = sjcl.codec.utf8String.toBits(block);
+		var iv = sjcl.random.randomWords(4, 0); /* should have enough entropy after we got the key */
+		var aes = new sjcl.cipher.aes(aes_256_ofb_derive_key(key, iv));
+		var cipher = ofb(aes, data, iv);
+		cipher.splice(0,0,iv[0],iv[1],iv[2],iv[3]);
+		return sjcl.codec.base64.fromBits(cipher);
+	}
+
+	// returns [aes key, iv]
+	function aes_128_cbc_key_derive(key, salt) {
+		var t = sjcl.bitArray.concat(sjcl.codec.utf8String.toBits(key), salt);
+		var md5 = sjcl.hash.md5.hash; // returns 4*32 = 128 bits
+		var m1 = md5(t);
+		var m2 = md5(sjcl.bitArray.concat(m1, t));
+		// var m3 = md5(sjcl.bitArray.concat(m2, t));
+		return [m1, m2];
+	}
+
+	function aes_128_cbc_decrypt(key, block) {
+		var data = sjcl.codec.base64.toBits(block);
+		var magic = data.splice(0, 2);
+		if (sjcl.codec.utf8String.fromBits(magic) !== "Salted__") throw "AES-128-CBC: unexpected input, missing 'Salted__' prefix";
+		var salt = data.splice(0, 2);
+		var kiv = aes_128_cbc_key_derive(key, salt);
+		var aes = new sjcl.cipher.aes(kiv[0]);
+		return sjcl.codec.utf8String.fromBits(sjcl.mode.cbc.decrypt(aes, data, kiv[1], [])).slice(0, -1); // drop trailing \n
+	}
+
+	function aes_128_cbc_encrypt(key, block) {
+		var data = sjcl.codec.utf8String.toBits(block + "\n");
+		var magic = sjcl.codec.utf8String.toBits("Salted__");
+		var salt = sjcl.random.randomWords(2, 0); /* should have enough entropy after we got the key */
+		var kiv = aes_128_cbc_key_derive(key, salt);
+		var aes = new sjcl.cipher.aes(kiv[0]);
+		var cipher = sjcl.mode.cbc.encrypt(aes, data, kiv[1], []);
+		return sjcl.codec.base64.fromBits(magic.concat(salt, cipher));
+	}
+
 	var b = {
-		decrypt: function(key, block) {
-			var data = sjcl.codec.base64.toBits(block);
-			var iv = data.splice(0, 4); /* extract 4 32-bit ints = 128 bits */
-			var aes = new sjcl.cipher.aes(derive_key(key, iv));
-			return sjcl.codec.utf8String.fromBits(ofb(aes, data, iv));
+		decrypt: function(key, block, cipher) {
+			switch (cipher) {
+			case 'AES-256-OFB':
+				return aes_256_ofb_decrypt(key, block);
+				break;
+			case 'AES-128-CBC':
+				return aes_128_cbc_decrypt(key, block);
+				break;
+			default:
+				throw ('cipher "' + cipher + '" not supported');
+			}
 		},
 
-		encrypt: function(key, block) {
-			var data = sjcl.codec.utf8String.toBits(block);
-			var iv = sjcl.random.randomWords(4, 0); /* should have enough entropy after we got the key */
-			var aes = new sjcl.cipher.aes(derive_key(key, iv));
-			var cipher = ofb(aes, data, iv);
-			cipher.splice(0,0,iv[0],iv[1],iv[2],iv[3]);
-			return sjcl.codec.base64.fromBits(cipher);
+		encrypt: function(key, block, cipher) {
+			switch (cipher) {
+			case 'AES-256-OFB':
+				return aes_256_ofb_encrypt(key, block);
+				break;
+			case 'AES-128-CBC':
+				return aes_128_cbc_encrypt(key, block);
+				break;
+			default:
+				throw ('cipher "' + cipher + '" not supported');
+			}
 		},
 
 		sha: function(text) {

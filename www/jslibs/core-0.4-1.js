@@ -13,26 +13,20 @@
 
 $( function() {
 	var editor; // syntax highlighter
-	var _encrypting = null; // used as flag state to determine if encryption is in mid-progress
+	var encryptionInProgress = null; // used as flag state to determine if encryption is in mid-progress
 
-	var __timer_decryption; // time taken to decrypt
-	var __timer_encryption; // time taken to encrypt
-	var __timer_coloring; // time taken to color syntax
-	var __timer_total; // total time taken
+	var time_decryption = 0;
+	var timer_decrypted = null; // created after decryption to measure editor coloring
 
-	// simply class to calculate time difference
-	var timeDiff = {
-		time: undefined,
-		setStartTime: function () {
-			var d = new Date();
-			this.time = d.getTime();
-		},
-
-		getDiff: function () {
-			var d = new Date();
-			return d.getTime() - this.time;
+	function TimeDiff() {
+		var start = new Date();
+		return {
+			getDiff: function() {
+				var end = new Date();
+				return end.getTime() - start;
+			}
 		}
-	};
+	}
 
 	// break up the string every nth character
 	function stringBreak( str, col )
@@ -49,65 +43,60 @@ $( function() {
 		return result;
 	}
 
-	// hover effect when moving mouse over submit button
-	function enableHover()
-	{
-		$( '#en' ).hover(
-			function() {
-				$( '#result' ).show();
-				$( '#encrypttime' ).show();
-			},
-			function() {
-				$( '#result' ).hide();
-				$( '#encrypttime' ).hide();
-			}
-		);
-	}
-
 	// determine duration taken to render the syntax highlighter
 	function onCodeChange( /* ed, obj */ )
 	{
-		__timer_coloring = timeDiff.getDiff();
-		// display duration
-		$( '#coloring' ).html( 'syntax: ' + __timer_coloring + 'ms,');
-		
-		// if we have hit this point it means we have finished, display total time taken
-		__timer_total = ( __timer_decryption + __timer_coloring );
-		$( '#totaltime' ).html( 'total: ' + __timer_total + 'ms');
+		if (null != timer_decrypted) {
+			var coloring = timer_decrypted.getDiff();
+			// display duration
+			$( '#coloring' ).html( 'syntax: ' + coloring + 'ms,');
+
+			// if we have hit this point it means we have finished, display total time taken
+			var total = ( time_decryption + coloring );
+			$( '#totaltime' ).html( 'total: ' + total + 'ms');
+		}
 	}
 
-	// simple function wrapper to decryption time can be logged
-	function decrypt( key, data )
+	function decrypt_update()
 	{
-		// display decrypt buffering image..
+		$( '.cm-s-default' ).parent().hide();
+		$( '#decrypting' ).hide();
+
+		var key = window.location.hash.substring( 1 );
+		var data = $( '#data' ).val();
+		var cipher = $( '#cipher' ).val();
+		if ('' == data) {
+			$( '#askpassword' ).show();
+			$( '#typepassword' ).focus();
+			return false;
+		}
+		else {
+			$( '#askpassword' ).hide();
+		}
+		if ('' == key) {
+			$( '#insertkey' ).show();
+			$( '#typekey' ).focus();
+			return false;
+		}
+		else {
+			$( '#insertkey' ).hide();
+		}
+
 		$( '#decrypting' ).show();
-		// hide key field
-		$( '#insertkey' ).hide();
 		// start timer and decrypt
-		timeDiff.setStartTime();
-		var output = window.ezcrypt_backend.decrypt( key, data );
-		__timer_decryption = timeDiff.getDiff();
-		
-		timeDiff.setStartTime(); // reset timer
+		var t = new TimeDiff();
+		var output = window.ezcrypt_backend.decrypt( key, data, cipher );
+		// display duration
+		time_decryption = t.getDiff();
+		$( '#execute' ).html( 'decryption: ' + time_decryption + 'ms,');
 
 		$( '#wrapholder' ).show();
-		// display duration
-		$( '#execute' ).html( 'decryption: ' + __timer_decryption + 'ms,');
 		$( '.cm-s-default' ).parent().show();
 		$( '#decrypting' ).hide();
-		return output;
-	}
 
-	// simple function wrapper to encryption
-	// @todo: add timestamp on encrypting?
-	function encrypt( key, data )
-	{
-		// start timer and encrypt
-		timeDiff.setStartTime();
-		var encrypt = stringBreak( window.ezcrypt_backend.encrypt( key, data ), 96 );
-		__timer_encryption = timeDiff.getDiff();
-		$( '#encrypttime' ).html( 'encryption: ' + __timer_encryption + 'ms');
-		return encrypt;
+		timer_decrypted = new TimeDiff();
+		editor.setOption( 'mode', $( '#syntax' ).val() );
+		editor.setValue( output );
 	}
 
 	// when a password is assigned to a paste
@@ -131,20 +120,9 @@ $( function() {
 				// success, assign the data accordingly
 				$( '#data' ).val( json.data );
 				$( '#syntax' ).val( json.syntax );
-				editor.setOption( 'mode', $( '#syntax' ).val() );
-				if( hash == '' )
-				{
-					// if no hash in the url, we prompt the user to enter it
-					$( '#askpassword' ).hide();
-					$( '#insertkey' ).show();
-					$( '#typekey' ).focus();
-				}
-				else
-				{
-					// decrypt our data
-					$( '#askpassword' ).hide();
-					editor.setValue( decrypt( hash.substring( 1 ), $( '#data' ).val() ) );
-				}
+				$( '#cipher' ).val( json.cipher );
+
+				decrypt_update();
 			},
 			error: function() {
 				alert( 'bad password!' );
@@ -152,51 +130,80 @@ $( function() {
 		} );
 	}
 
+	function encrypt_update()
+	{
+		/* remove delayed update timer */
+		if (encryptionInProgress != null) {
+			clearTimeout(encryptionInProgress);
+			encryptionInProgress = null;
+		}
+
+		var key = $( '#new_key' ).val();
+		var text = $( '#new_text' ).val();
+		var cipher = $( '#new_cipher' ).val();
+		$( '#new_result' ).html('');
+		$( '#new_encrypttime' ).html('');
+
+		if ('' == key || '' == text) return ''; /* don't do anything without key and text */
+
+		// start timer and encrypt
+		var t = new TimeDiff();
+		var encrypt = stringBreak( window.ezcrypt_backend.encrypt( key, text, cipher ), 96 );
+		$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
+		$( '#new_result' ).val(encrypt);
+
+		return encrypt;
+	}
+
+	/* reset timer for delayed update */
+	function encrypt_update_delayed()
+	{
+		if( encryptionInProgress != null ) { clearTimeout( encryptionInProgress ); encryptionInProgress = null; }
+		encryptionInProgress = setTimeout( function() {
+			encryptionInProgress = null;
+			encrypt_update();
+		}, 500 );
+	}
+
 	function submitData()
 	{
-		if( $( '#text' ).val() == '' )
+		if( $( '#new_text' ).val() == '' )
 		{
 			return false; // don't submit if blank form
 		}
 
-		if( _encrypting != null )
-		{
-			// stop delayed encryption timer, force re-encrypt now by emptying #result
-			clearTimeout(_encrypting);
-			_encrypting = null;
-			$( '#result' ).val('')
-		}
+		var key = $( '#new_key' ).val();
+		var cipher = $( '#new_cipher' ).val();
 
-		if( $( '#result' ).val() == '' )
+		/* update encrypted text now if either update is pending or no result available */
+		if( encryptionInProgress != null || $( '#new_result' ).val() == '' )
 		{
-			$( '#result' ).val( encrypt( $( '#key' ).val(), $( '#text' ).val() ) );
+			encrypt_update();
 		}
 
 		$( '#en' ).unbind( 'mouseenter mouseleave' );
-		$( '#result' ).show();
-		$( '#encrypttime' ).show();
+		$( '#new_result' ).show();
+		$( '#new_encrypttime' ).show();
 
-		// make data post friendly
-		var data = $( '#result' ).val();
-		data = encodeURIComponent( data );
+		var data = $( '#new_result' ).val();
 		var password = '';
-		if( $( '#usepassword' ).is( ':checked' ) )
+		if( $( '#new_usepassword' ).is( ':checked' ) )
 		{
 			// if password is used, let's sha the password before we send it over
-			password = window.ezcrypt_backend.sha( $( '#typepassword' ).val() );
+			password = window.ezcrypt_backend.sha( $( '#new_typepassword' ).val() );
 		}
 
-		var ttl = $( '#ttl option:selected' ).val();
-		var syntax = $( '#syntax option:selected' ).val();
+		var ttl = $( '#new_ttl' ).val();
+		var syntax = $( '#new_syntax' ).val();
 		// if syntax is empty, try hidden element incase of clone feature
 		if( typeof( syntax ) == 'undefined' ) { syntax = $( '#syntax' ).val(); }
-		
+
 		// send submission to server
 		$.ajax( {
 			url: document.baseURI,
 			type: 'POST',
 			dataType: 'json',
-			data: '&data=' + data + '&p=' + password + '&ttl=' + ttl + '&syn=' + syntax,
+			data: 'data=' + encodeURIComponent(data) + '&p=' + password + '&ttl=' + encodeURIComponent(ttl) + '&syn=' + encodeURIComponent(syntax) + '&cipher=' + encodeURIComponent(cipher),
 			cache: false,
 			success: function( json ) {
 				if( ttl == -100 )
@@ -209,7 +216,7 @@ $( function() {
 				{
 					var querypw = '';
 					if (password != '') querypw = '?p=' + password;
-					window.location = document.baseURI + 'p/' + json.id + querypw + '#' + $( '#key' ).val();
+					window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
 				}
 			},
 			error: function() {
@@ -231,84 +238,77 @@ $( function() {
 			onChange: onCodeChange
 		} );
 		
-		editor.setOption( 'mode', $( '#syntax' ).val() );
+		editor.setOption( 'mode', $( '#new_syntax' ).val() );
 		editor.focus();
 	}
 
+	/* wait until we have a key (may have to wait for some entropy from user inputs) */
 	window.ezcrypt_backend.randomKey(function (key) {
-		$( '#key' ).val( key );
+		$( '#new_key' ).val( key );
 		var en = $('#en');
 		en.bind( 'click', submitData );
 		en.removeAttr( 'disabled' );
 		en.val( 'Submit' );
 
-		// when we detect the text has changed we flag the encryption to trigger off 500ms afterwards
-		// if more text gets entered the trigger will continue resetting as not to cause unwanted CPU usage
-		$( '#text' ).bind( 'textchange', function() {
-			if( _encrypting != null ) { clearTimeout( _encrypting ); _encrypting = null; }
-			_encrypting = setTimeout( function() {
-				$( '#result' ).val( encrypt( $( '#key' ).val(), $( '#text' ).val() ) );
-				_encrypting = null;
-			}, 500 );
-		} );
+		var text = $( '#new_text' );
+		if ('' != text.val()) encrypt_update_delayed();
+		text.bind( 'textchange', encrypt_update_delayed );
+
+		// support ctrl+enter to send paste
+		text.live( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
+
+		// hover effect when moving mouse over submit button
+		en.hover(
+			function() {
+				$( '#new_result' ).show();
+				$( '#new_encrypttime' ).show();
+			},
+			function() {
+				$( '#new_result' ).hide();
+				$( '#new_encrypttime' ).hide();
+			}
+		);
 	});
 
-	// support ctrl+enter to send paste
-	$( '#text' ).live( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { $( '#en' ).click(); } } );
-	
-	$( '#usepassword' ).change( function() { if( this.checked ) { $( '#typepassword' ).show(); } else { $( '#typepassword' ).hide(); } } );
-	$( '#submitpassword' ).bind( 'click', requestData );
+	$( '#new_usepassword' ).change( function() { if( this.checked ) { $( '#new_typepassword' ).show(); } else { $( '#new_typepassword' ).hide(); } } );
 
-	$( '#new' ).bind( 'click', function() { $( '#text' ).html( '' ); $( '#result' ).val( '' ); $( '#newpaste' ).slideDown(); } );
-	$( '#clone' ).bind( 'click', function() { $( '#text' ).html( editor.getValue() ).trigger( 'textchange' ); $( '#newpaste' ).slideDown(); } );
-	 
-	$( '#tool-wrap' ).bind( 'click', function() {
-		var checked = $( '#tool-wrap' ).is( ':checked' );
-		if( checked == 1 )
-		{
-			$( '.tool-wrap' ).addClass( 'tool-wrap-on' );
-			editor.setOption( 'lineWrapping', true );
-		}
-		else
-		{
-			$( '.tool-wrap' ).removeClass( 'tool-wrap-on' );
-			editor.setOption( 'lineWrapping', false );
-		}
-	} );
-	$( '#tool-numbers' ).bind( 'click', function() {
-		var checked = $( '#tool-numbers' ).is( ':checked' );
-		if( checked == 1 )
-		{
-			$( '.tool-numbers' ).addClass( 'tool-numbers-on' );
-			editor.setOption( 'lineNumbers', true );
-		}
-		else
-		{
-			$( '.tool-numbers' ).removeClass( 'tool-numbers-on' );
-			editor.setOption( 'lineNumbers', false );
-		}
-	} );
-	$( '#tool-fullscreen' ).bind( 'click', function() {
-		var checked = $( '#tool-fullscreen' ).is( ':checked' );
-		if( checked == 1 )
-		{
-			$( '.tool-fullscreen' ).addClass( 'tool-fullscreen-on' );
-			$( '#holder' ).css( 'width', '100%' );
-		}
-		else
-		{
-			$( '.tool-fullscreen' ).removeClass( 'tool-fullscreen-on' );
-			$( '#holder' ).css( 'width', '' );
-		}
-	} );
 
-	enableHover();
+	if ($( '#askpassword').length) {
+		/* want to show a paste */
+		$( '#submitpassword' ).bind( 'click', requestData );
+		$( '#submitkey' ).bind( 'click', function() {
+			window.location = window.location + '#' + $( '#typekey' ).val();
+			decrypt_update();
+		});
+		$( '#typepassword,#typekey' ).live( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
+
+		$( '#new' ).bind( 'click', function() { $( '#new_text' ).html( '' ); $( '#new_result' ).val( '' ); $( '#newpaste' ).slideDown(); } );
+		$( '#clone' ).bind( 'click', function() { $( '#new_text' ).html( editor.getValue() ).trigger( 'textchange' ); $( '#newpaste' ).slideDown(); } );
+
+		$( '#tool-wrap' ).bind( 'click', function() {
+			var checked = $( '#tool-wrap' ).is( ':checked' );
+			$( '.tool-wrap' ).toggleClass('tool-wrap-on', checked);
+			editor.setOption( 'lineWrapping', checked );
+		} );
+		$( '#tool-numbers' ).bind( 'click', function() {
+			var checked = $( '#tool-numbers' ).is( ':checked' );
+			$( '.tool-numbers' ).toggleClass( 'tool-numbers-on', checked );
+			editor.setOption( 'lineNumbers', checked );
+		} );
+		$( '#tool-fullscreen' ).bind( 'click', function() {
+			var checked = $( '#tool-fullscreen' ).is( ':checked' );
+			$( '.tool-fullscreen' ).toggleClass( 'tool-fullscreen-on', checked );
+			$( '#holder' ).css( 'width', checked ? '100%' : '' );
+		} );
+
+		/* start first try to decrypt it and show dialogs that may be needed */
+		decrypt_update();
+	}
 
 	window.ezcrypt = {
 		sha: window.ezcrypt_backend.sha,
-		encrypt: encrypt,
-		decrypt: decrypt,
-		editor: editor,
-		requestData: requestData
+		encrypt: window.ezcrypt_backend.encrypt,
+		decrypt: window.ezcrypt_backend.decrypt,
+		editor: editor
 	}
 } );

@@ -11,8 +11,8 @@
 		<meta name="googlebot" content="noarchive" />
 		<?}?><meta http-equiv="cache-control" content="no-cache" />
 		<meta http-equiv="pragma" content="no-cache" />
-		<link rel="stylesheet" href="<?=$site_url?>css/styles.min.css" />
-		<link rel="shortcut icon" href="<?=$site_url?>favicon.ico" />
+		<link rel="stylesheet" href="css/styles.min.css" />
+		<link rel="shortcut icon" href="favicon.ico" />
 
 		<!--[if gte IE 9]>
 		<style type="text/css">
@@ -39,14 +39,14 @@
 			<div id="menu">
 				<a href="<?=$site_url?>">Home</a>
 				<span class="small">&nbsp;</span>
-				<a href="<?=$site_url?>about">About</a>
+				<a href="about">About</a>
 				<span class="small">&nbsp;</span>
 				<a href="<?=$site_contact?>">Contact</a>
 				<span class="small">&nbsp;</span>
-				<a href="<?=$site_url?>ezcrypt">Ruby CLI script</a>
+				<a href="ezcrypt">Ruby CLI script</a>
 				<span class="small">&nbsp;</span>
 				<a href="<?=$site_source?>" target="_blank">Sourcecode</a>
 				<span class="small">&nbsp;</span>
-				<div style="position: absolute; right: 0px; top: 10px;"><a href="http://flattr.com/thing/647627/EZCrypt" target="_blank"><img src="<?=$site_url?>css/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" width="93" height="20" /></a></div>
+				<div style="position: absolute; right: 0px; top: 10px;"><a href="http://flattr.com/thing/647627/EZCrypt" target="_blank"><img src="css/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" width="93" height="20" /></a></div>
 			</div>
 			<div id="main">

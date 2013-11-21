@@ -77,6 +77,8 @@
 				break;
 			case 'raw':
 				header( 'Content-Type: application/octet-stream' );
+				if (!empty( $object['syntax'] )) header( 'X-Syntax: ' + urlencode( $object['syntax'] ) );
+				if (!empty( $object['cipher'] )) header( 'X-Cipher: ' + urlencode( $object['cipher'] ) );
 				echo $object['data'];
 				break;
 			}

@@ -4,14 +4,14 @@
 </div>
 
 <div style="position: relative;">
-	<textarea id="text" name="text" spellcheck="false"></textarea>
-	<textarea id="result" name="result" readonly spellcheck="false"></textarea>
-	<div id="encrypttime"></div>
+	<textarea id="new_text" name="new_text" spellcheck="false"></textarea>
+	<textarea id="new_result" name="new_result" readonly spellcheck="false"></textarea>
+	<div id="new_encrypttime"></div>
 </div>
 
 <div id="options">
 	<acronym title="Expire this paste after the period of time selected">Expire in</acronym>
-	<select id="ttl">
+	<select id="new_ttl">
 		<!--<option value="-100">one-time only</option>-->
 		<option value="300">five minutes</option>
 		<option value="3600">an hour</option>
@@ -22,9 +22,10 @@
 		<option value="-1">indefinately</option>
 	</select>
 	&nbsp;|&nbsp;
-	<label for="usepassword"><acronym title="This password is not used to encrypt the paste">Assign password</acronym></label>&nbsp;<input id="usepassword" type="checkbox" name="usepassword" value="1" />
-	<input type="text" id="typepassword" name="password" style="display: none;" />
+	<label for="new_usepassword"><acronym title="This password is not used to encrypt the paste">Assign password</acronym></label>&nbsp;<input id="new_usepassword" type="checkbox" name="new_usepassword" />
+	<input type="text" id="new_typepassword" name="new_typepassword" style="display: none;" />
 
-	<input type="hidden" id="key" name="key" />
-	<input type="submit" id="en" value="Generating key... (waiting for entropy)" style="float: right;" disabled />
+	<input type="hidden" id="new_key" name="new_key" />
+	<input type="hidden" id="new_cipher" name="new_cipher" value="AES-256-OFB" />
+	<input type="submit" id="en" name="en" value="Generating key... (waiting for entropy)" style="float: right;" disabled />
 </div>

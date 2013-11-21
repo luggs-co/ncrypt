@@ -298,7 +298,7 @@ textarea
 	padding: 5px;
 }
 
-#result
+#new_result
 {
 	display: none;
 	position: absolute;
@@ -479,7 +479,7 @@ textarea
 	border-bottom-color: #dedede !important;
 }
 
-#encrypttime
+#new_encrypttime
 {
 	display: none;
 	position: absolute;

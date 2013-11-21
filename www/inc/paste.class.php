@@ -36,7 +36,18 @@
 				$expired = $this->has_expired();
 				if( $expired === false )
 				{
-					return $this->paste;
+					switch ($paste['crypto']) {
+					case 'PIDCRYPT':
+						$paste['cipher'] = 'AES-128-CBC';
+						break;
+					case 'CRYPTO_JS':
+						$paste['cipher'] = 'AES-256-OFB';
+						break;
+					default:
+						$paste['cipher'] = $paste['crypto'];
+					}
+
+					return $paste;
 				}
 				
 				return $expired;

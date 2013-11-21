@@ -34,7 +34,7 @@
 		return pg_fetch_assoc($res);
 	}
 
-	function db_backend_add($db, $data, $syntax, $ttl, $password)
+	function db_backend_add($db, $data, $syntax, $ttl, $password, $cipher)
 	{
 		$sql = '
 			INSERT INTO
@@ -45,7 +45,7 @@
 			RETURNING id
 		';
 
-		$res = pg_query_params($db, $sql, array($data, $syntax, $ttl, $password, 'CRYPTO_JS'))  or die("Failed to execute query '$sql'");
+		$res = pg_query_params($db, $sql, array($data, $syntax, $ttl, $password, $cipher))  or die("Failed to execute query '$sql'");
 
 		$row = pg_fetch_row($res);
 		return $row[0];

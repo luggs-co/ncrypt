@@ -40,7 +40,7 @@
 		return $res->fetch_array(MYSQLI_ASSOC);
 	}
 
-	function db_backend_add($db, $data, $syntax, $ttl, $password)
+	function db_backend_add($db, $data, $syntax, $ttl, $password, $cipher)
 	{
 		$sql = '
 			INSERT INTO
@@ -51,8 +51,7 @@
 		';
 
 		$stmt = $db->prepare($sql);
-		$crypto = 'CRYPTO_JS';
-		$stmt->bind_param('ssiss', $data, $syntax, $ttl, $password, $crypto);
+		$stmt->bind_param('ssiss', $data, $syntax, $ttl, $password, $cipher);
 		$stmt->execute();
 		$stmt->close();
 

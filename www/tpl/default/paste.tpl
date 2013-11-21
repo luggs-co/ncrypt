@@ -1,63 +1,24 @@
 <?php
 	$this->incl('includes/header.tpl');
 ?>
-	<script type="text/javascript">
-		head.ready(function() { $( function() {
-			var editor = ezcrypt.editor;
-			var key = window.location.hash.substring( 1 );
-			var data = $( '#data' ).val();
-			if( key != '' && data != '' )
-			{
-				editor.setValue( ezcrypt.decrypt( key, data ) );
-			}
-			else
-			{
-				$( '#typepassword,#typekey' ).live( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
-				$( '.cm-s-default' ).parent().hide();
-				$( '#decrypting' ).hide();
-<?php
-	if( $require_password )
-	{
-?>
-				$( '#askpassword' ).show();
-				$( '#typepassword' ).focus();
-<?php
-	}
-	else
-	{
-?>
-					$( '#insertkey' ).show();
-					$( '#typekey' ).focus();
-<?php
-	}
-?>
-			}
-		} ); } );
-	</script>
-<?php
-	if( $require_password )
-	{
-?>
 	<div id="askpassword">
 		Enter password:&nbsp;
 		<input type="password" id="typepassword" style="width: 250px;" autocomplete="off"/>&nbsp;
 		<input type="button" id="submitpassword" value="Submit" />
 	</div>
-<?php
-	}
-?>
 	<div id="insertkey">
 		Enter key to decrypt:&nbsp;
 		<input type="text" id="typekey" style="width: 450px;" autocomplete="off" />&nbsp;
-		<input type="button" value="Decrypt" onclick="window.location = '#' + $( '#typekey' ).val(); editor.setValue( decrypt( $( '#typekey' ).val(), $( '#data' ).val() ) );" />
+		<input type="button" id="submitkey" value="Decrypt" />
 	</div>
-	<input type="hidden" name="syntax" id="syntax" value="<?=$syntax;?>" />
-	<input type="hidden" name="data" id="data" value="<?=$data;?>" />
-	
+	<input type="hidden" name="syntax" id="syntax" value="<?=htmlspecialchars($syntax);?>" />
+	<input type="hidden" name="data" id="data" value="<?=htmlspecialchars($data);?>" />
+	<input type="hidden" name="cipher" id="cipher" value="<?=htmlspecialchars($cipher);?>" />
+
 	<div id="newpaste">
 		<?php $this->incl('includes/new.tpl'); ?>
 	</div>
-	
+
 	<div id="wrapholder">
 		<a id="new">New</a>
 		<a id="clone">Clone</a>
