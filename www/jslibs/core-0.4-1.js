@@ -98,6 +98,42 @@ $( function() {
 		}
 	}
 
+	function display_binary_hex(bytes, syntax)
+	{
+		var offprefix = bytes.length.toString(16).replace(/./g, '0')
+		bytes = bytes.slice();
+		var BYTES_PER_LINE = 20;
+		var lines = [], bline, offset = 0, line, i, j;
+		lines.push('Binary file of type: ' + syntax + "\n");
+		lines.push("\n");
+		while (bytes.length > 0) {
+			bline = bytes.splice(0, BYTES_PER_LINE);
+			line = (offprefix + offset.toString(16)).slice(-offprefix.length) + ':';
+			offset += bline.length;
+			for (i = 0; i < BYTES_PER_LINE; ) {
+				line += ' ';
+				for (j = 0; j < 4; ++j, ++i) {
+					if (i < bline.length) {
+						line += ('00' + bline[i].toString(16)).slice(-2) + ' ';
+					} else {
+						line += '   ';
+					}
+				}
+			}
+			line += '| ';
+			for (i = 0; i < bline.length; ++i) {
+				if (bline[i] >= 0x20 && bline[i] <= 0x7e) {
+					line += String.fromCharCode(bline[i])
+				} else {
+					line += '.';
+				}
+			}
+			line += "\n";
+			lines.push(line);
+		}
+		return lines.join('');
+	}
+
 	function decrypt_update()
 	{
 		$( '.cm-s-default' ).parent().hide();
@@ -137,8 +173,13 @@ $( function() {
 				$( '#decrypting' ).hide();
 
 				timer_decrypted = new TimeDiff();
-				editor.setOption( 'mode', $( '#syntax' ).val() );
-				editor.setValue( output );
+				if ('string' === typeof output || output instanceof String) {
+					editor.setOption( 'mode', $( '#syntax' ).val() );
+					editor.setValue( output );
+				} else {
+					editor.setOption( 'mode', 'text/plain' );
+					editor.setValue( display_binary_hex(output, $( '#syntax' ).val()) );
+				}
 			}
 			else if (error) {
 				$( '#decrypting' ).hide();
