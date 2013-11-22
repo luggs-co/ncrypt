@@ -35,8 +35,11 @@ N0h5DmJUWq33D/BPdbpoHt0IFesJzsgt5dlXPF/zyFeJvDwlKCe3lqfym2f5fJG3YQRV1YqAtEKm9d9E
 		}); });
 	</script>
 
-	<input type="hidden" id="content" />
-	<div id="speed"><div id="totaltime"></div><div id="execute"></div><div id="coloring"></div></div>
+	<div id="alternate_content"></div>
+	<div id="content_container">
+		<input type="hidden" id="content" />
+		<div id="speed"><div id="totaltime"></div><div id="execute"></div><div id="coloring"></div></div>
+	</div>
 
 	<div style="height: 20px; border-bottom: 1px SOLID #f2f2f2;"></div>
 	<div style="height: 20px;"></div>

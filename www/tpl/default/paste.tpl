@@ -22,6 +22,8 @@
 	<div id="wrapholder">
 		<a id="new">New</a>
 		<a id="clone">Clone</a>
+		<a id="saveas">Save as</a>
+		<a id="showhex">Show hex</a>
 		<label class="tool-numbers tool-numbers-on" for="tool-numbers" title="Toggle Numbers"></label> <input type="checkbox" checked="checked" id="tool-numbers" />
 		<label class="tool-wrap" for="tool-wrap" title="Wrap Lines"></label> <input type="checkbox" id="tool-wrap" />
 		<label class="tool-fullscreen" for="tool-fullscreen" title="Fullscreen"></label> <input type="checkbox" id="tool-fullscreen" />
@@ -29,9 +31,12 @@
 	<div id="wrap" style="clear: both;"></div>
 	
 	<div id="decrypting"></div>
-	<input type="hidden" id="content" />
-	
-	<div id="speed"><div id="totaltime"></div><div id="execute"></div><div id="coloring"></div></div>
+	<div id="alternate_content"></div>
+	<div id="content_container">
+		<input type="hidden" id="content" />
+		<div id="speed"><div id="totaltime"></div><div id="execute"></div><div id="coloring"></div></div>
+	</div>
+
 
 	<noscript>
 		<div id="noscript">

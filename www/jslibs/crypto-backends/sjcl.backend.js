@@ -4,6 +4,9 @@ var global = typeof window !== "undefined" && window !== null ? window : this;
 (function() {
 	var window = global;
 
+	var console = ('undefined' === typeof global.console) ? { } : global.console;
+	if ('undefined' === typeof console.log) console.log = function(){};
+
 #INCLUDE sjcl/core/sjcl.js
 #INCLUDE sjcl/core/aes.js
 #INCLUDE sjcl/core/cbc.js

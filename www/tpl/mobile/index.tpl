@@ -24,8 +24,11 @@ KeXrvOb/x8e7UZu+XTOV6xRp25U=';
 		editor.setValue( ezcrypt.decrypt( key, welcome, cipher ) );
 	</script>
 
-	<input type="hidden" id="content" />
-	<div id="speed"><div id="totaltime"></div><div id="execute"></div><div id="coloring"></div></div>
+	<div id="alternate_content"></div>
+	<div id="content_container">
+		<input type="hidden" id="content" />
+		<div id="speed"><div id="totaltime"></div><div id="execute"></div><div id="coloring"></div></div>
+	</div>
 
 	<div style="height: 20px; border-bottom: 1px SOLID #f2f2f2;"></div>
 	<div style="height: 5px;"></div>

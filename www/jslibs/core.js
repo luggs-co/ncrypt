@@ -13,6 +13,8 @@
 
 $( function() {
 	var worker, worker_pending, worker_next_id, worker_send, worker_has_entropy = false;
+	var console = ('undefined' === typeof window.console) ? { } : window.console;
+	if ('undefined' === typeof console.log) console.log = function(){};
 
 	if (typeof Worker !== 'undefined' && typeof window.ezcrypt_worker === 'undefined') {
 		worker = new Worker(window.ezcrypt_crypto_backend_url);
@@ -121,13 +123,8 @@ $( function() {
 				}
 			}
 			line += '| ';
-			for (i = 0; i < bline.length; ++i) {
-				if (bline[i] >= 0x20 && bline[i] <= 0x7e) {
-					line += String.fromCharCode(bline[i])
-				} else {
-					line += '.';
-				}
-			}
+			// replace non printable characters (in unicode <= 0xff) with '.'; each byte is treated as a separate unicode codepoint
+			line += String.fromCharCode.apply(String, bline).replace(/[\0-\x1F\x7F-\x9F\xAD]/g, '.')
 			line += "\n";
 			lines.push(line);
 		}
@@ -136,7 +133,7 @@ $( function() {
 
 	function decrypt_update()
 	{
-		$( '.cm-s-default' ).parent().hide();
+		$( '#content_container' ).hide();
 		$( '#decrypting' ).hide();
 
 		var key = window.location.hash.substring( 1 );
@@ -168,28 +165,62 @@ $( function() {
 				time_decryption = t.getDiff();
 				$( '#execute' ).html( 'decryption: ' + time_decryption + 'ms,');
 
+				var blob;
+
 				$( '#wrapholder' ).show();
-				$( '.cm-s-default' ).parent().show();
+				$( '#content_container' ).show();
 				$( '#decrypting' ).hide();
 
 				timer_decrypted = new TimeDiff();
 				if ('string' === typeof output || output instanceof String) {
+					try {
+						var blob = new Blob([output], { type: syntax });
+					} catch (e) {
+						console.log("saveAs not working:");
+						console.log(e);
+					}
+
 					editor.setOption( 'mode', $( '#syntax' ).val() );
 					editor.setValue( output );
-				} else {
+
+					$( '#showhex' ).hide();
+				}
+				else {
+					try {
+						var blob = new Blob([new Uint8Array(output)], { type: syntax });
+					} catch (e) {
+						console.log("saveAs not working:");
+						console.log(e);
+					}
+
 					var syntax = $( '#syntax' ).val();
+					var hide_hex = false;
 					try {
 						if (syntax.match(/^image\//)) {
 							var imagesource = 'data:'+syntax+';base64,' + btoa(String.fromCharCode.apply(this, output));
 							var img = $( '<img>' ).attr( 'src', imagesource );
-							$( '#content' ).before( img );
+							$( '#alternate_content' ).append( img );
+							hide_hex = true;
 						}
 					} catch (e) {
 						console.log("special binary handling failed:");
 						console.log(e);
 					}
+
 					editor.setOption( 'mode', 'text/plain' );
 					editor.setValue( display_binary_hex(output, syntax) );
+
+					$( '#showhex' ).toggle(hide_hex);
+					$( '#content_container').toggle(!hide_hex);
+				}
+
+				if (blob) {
+					$( '#saveas' ).show().bind( 'click', function() {
+						saveAs(blob);
+					});
+				}
+				else {
+					$( '#saveas' ).hide();
 				}
 			}
 			else if (error) {
@@ -312,6 +343,58 @@ $( function() {
 		}, 500 );
 	}
 
+	function submitFile()
+	{
+		var key = $( '#new_key' ).val();
+		var cipher = $( '#new_cipher' ).val();
+		var ttl = $( '#new_ttl' ).val();
+		var file = $( '#upload_file' )[0].files[0];
+		var syntax = file.type || 'application/octet-stream';
+
+		var password = '';
+		if( $( '#new_usepassword' ).is( ':checked' ) )
+		{
+			// if password is used, let's sha the password before we send it over
+			password = window.ezcrypt_backend.sha( $( '#new_typepassword' ).val() );
+		}
+
+		var reader = new FileReader();
+		reader.onload = function() {
+			var bytes = new Uint8Array(reader.result);
+			window.ezcrypt.async_encrypt([key, bytes, cipher, {binary:true}], function (data /*, error, progress */) {
+				if (!data) return;
+
+				// send submission to server
+				$.ajax( {
+					url: document.baseURI,
+					type: 'POST',
+					dataType: 'json',
+					data: 'data=' + encodeURIComponent(data) + '&p=' + password + '&ttl=' + encodeURIComponent(ttl) + '&syn=' + encodeURIComponent(syntax) + '&cipher=' + encodeURIComponent(cipher),
+					cache: false,
+					success: function( json ) {
+						if( ttl == -100 )
+						{
+							// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
+							// instead we simply mock the page and provide the url of the paste
+							
+						}
+						else
+						{
+							var querypw = '';
+							if (password != '') querypw = '?p=' + password;
+							window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
+						}
+					},
+					error: function() {
+						enableHover();
+						alert( 'error submitting form' );
+					}
+				} );
+			});
+		};
+		reader.readAsArrayBuffer(file);
+	}
+
 	function submitData()
 	{
 		if( $( '#new_text' ).val() == '' )
@@ -388,12 +471,21 @@ $( function() {
 
 	/* wait until we have a key (may have to wait for some entropy from user inputs) */
 	if ($( '#new_key' ).length) {
+		$( '#upload' ).hide();
+		$( '#upload' ).bind( 'click', function(e) {
+			$( '#upload_file' ).click();
+			e.preventDefault();
+			return false;
+		});
+
 		window.ezcrypt_backend.randomKey(function (key) {
 			$( '#new_key' ).val( key );
 			var en = $('#en');
 			en.bind( 'click', submitData );
+			$( '#upload_file' ).bind( 'change', submitFile );
 			en.removeAttr( 'disabled' );
 			en.val( 'Submit' );
+			if ('undefined' !== typeof FileReader) $( '#upload' ).show();
 
 			var text = $( '#new_text' );
 			if ('' != text.val()) encrypt_update_delayed();
@@ -445,6 +537,10 @@ $( function() {
 			$( '.tool-fullscreen' ).toggleClass( 'tool-fullscreen-on', checked );
 			$( '#holder' ).css( 'width', checked ? '100%' : '' );
 		} );
+
+		$( '#showhex' ).bind( 'click', function() {
+			$( '#content_container' ).toggle();
+		})
 
 		/* start first try to decrypt it and show dialogs that may be needed */
 		decrypt_update();

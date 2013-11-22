@@ -1,6 +1,7 @@
 
-all:
+all: main-0.4-1.min.js
 .PHONY: all
 
-%.min.js: %.js
-	uglifyjs -v --lint --source-map $@.map -o $@ $<
+.PHONY: main-0.4-1.min.js
+main-0.4-1.min.js: Blob.js FileSaver.js core.js
+	uglifyjs -v --lint --source-map $@.map -o $@ $^
