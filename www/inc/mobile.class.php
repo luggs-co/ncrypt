@@ -92,8 +92,8 @@ class Mobile
 	{
 		// Merge all rules together.
 		$this->detectionRules = array_merge( $this->phoneDevices, $this->tabletDevices, $this->operatingSystems, $this->userAgents );
-		$this->userAgent = $_SERVER['HTTP_USER_AGENT'];
-		$this->accept = $_SERVER['HTTP_ACCEPT'];
+		$this->userAgent = SERVER('HTTP_USER_AGENT');
+		$this->accept = SERVER('HTTP_ACCEPT');
 		if(
 			isset( $_SERVER['HTTP_X_WAP_PROFILE'] ) ||
 			isset( $_SERVER['HTTP_X_WAP_CLIENTID'] ) ||

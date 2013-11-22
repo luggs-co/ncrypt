@@ -134,3 +134,24 @@
 	
 		return $out;
 	}
+
+
+	function POST($key, $default = '') {
+		if (isset($_POST[$key])) return $_POST[$key];
+		return $default;
+	}
+
+	function GET($key, $default = '') {
+		if (isset($_GET[$key])) return $_GET[$key];
+		return $default;
+	}
+
+	function REQUEST($key, $default = '') {
+		if (isset($_REQUEST[$key])) return $_REQUEST[$key];
+		return $default;
+	}
+
+	function SERVER($key, $default = '') {
+		if (isset($_SERVER[$key])) return $_SERVER[$key];
+		return $default;
+	}
