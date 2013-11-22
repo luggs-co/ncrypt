@@ -177,8 +177,19 @@ $( function() {
 					editor.setOption( 'mode', $( '#syntax' ).val() );
 					editor.setValue( output );
 				} else {
+					var syntax = $( '#syntax' ).val();
+					try {
+						if (syntax.match(/^image\//)) {
+							var imagesource = 'data:'+syntax+';base64,' + btoa(String.fromCharCode.apply(this, output));
+							var img = $( '<img>' ).attr( 'src', imagesource );
+							$( '#content' ).before( img );
+						}
+					} catch (e) {
+						console.log("special binary handling failed:");
+						console.log(e);
+					}
 					editor.setOption( 'mode', 'text/plain' );
-					editor.setValue( display_binary_hex(output, $( '#syntax' ).val()) );
+					editor.setValue( display_binary_hex(output, syntax) );
 				}
 			}
 			else if (error) {
