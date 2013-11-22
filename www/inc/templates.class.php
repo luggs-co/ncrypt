@@ -1,5 +1,10 @@
 <?php
 
+	# replace bad chars with a space for safe use in header()
+	function strip_unsafe_header($value) {
+		return preg_replace('/[^\x20-\x7e]+/', ' ', $value);
+	}
+
 	/**
 	 * Basic PHP based template system
 	 * 
@@ -77,8 +82,8 @@
 				break;
 			case 'raw':
 				header( 'Content-Type: application/octet-stream' );
-				if (!empty( $object['syntax'] )) header( 'X-Syntax: ' . urlencode( $object['syntax'] ) );
-				if (!empty( $object['cipher'] )) header( 'X-Cipher: ' . urlencode( $object['cipher'] ) );
+				if (!empty( $object['syntax'] )) header( 'X-Syntax: ' . strip_unsafe_header( $object['syntax'] ) );
+				if (!empty( $object['cipher'] )) header( 'X-Cipher: ' . strip_unsafe_header( $object['cipher'] ) );
 				echo $object['data'];
 				break;
 			}
