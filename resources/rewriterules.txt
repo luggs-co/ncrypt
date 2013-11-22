@@ -16,12 +16,12 @@ docroot "/docroot/"; # alias "/paste" => "/srv/ezcrypt/";
 if !physical.is_file {
 	docroot "/docroot/index.php"; # alias "/paste" => "/srv/ezcrypt/index.php";
 	pathinfo;
-
-	# some php handler
-	php;
 } else {
 	expire "access 2 weeks";
 }
+
+# some php handler. has to trigger on phys.path =$ ".php", not req.path!
+php;
 
 ~~~~ nginx ~~~~
 
