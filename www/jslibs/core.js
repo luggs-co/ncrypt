@@ -109,6 +109,10 @@ $( function() {
 		lines.push('Binary file of type: ' + syntax + "\n");
 		lines.push("\n");
 		while (bytes.length > 0) {
+			if (lines.length > 5000) {
+				lines.push("\n");
+				lines.push("too much data, stopping now\n");
+			}
 			bline = bytes.splice(0, BYTES_PER_LINE);
 			line = (offprefix + offset.toString(16)).slice(-offprefix.length) + ':';
 			offset += bline.length;
@@ -196,19 +200,21 @@ $( function() {
 					var syntax = $( '#syntax' ).val();
 					var hide_hex = false;
 					try {
-						if (syntax.match(/^image\//)) {
-							var imagesource = 'data:'+syntax+';base64,' + btoa(String.fromCharCode.apply(this, output));
-							var img = $( '<img>' ).attr( 'src', imagesource );
+						if (blob && syntax.match(/^image\//)) {
+							var img = $( '<img>' );
 							$( '#alternate_content' ).append( img );
 							hide_hex = true;
+							var blob_r = new FileReader();
+							blob_r.onload = function() { img[0].src = blob_r.result; };
+							blob_r.readAsDataURL(blob);
 						}
 					} catch (e) {
 						console.log("special binary handling failed:");
 						console.log(e);
 					}
 
-					editor.setOption( 'mode', 'text/plain' );
-					editor.setValue( display_binary_hex(output, syntax) );
+//					editor.setOption( 'mode', 'text/plain' );
+//					editor.setValue( display_binary_hex(output, syntax) );
 
 					$( '#showhex' ).toggle(hide_hex);
 					$( '#content_container').toggle(!hide_hex);
