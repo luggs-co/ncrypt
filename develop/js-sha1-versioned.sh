@@ -12,7 +12,7 @@ function usage() {
 	exit 1
 }
 
-tmpdir=$(mktemp --tmpdir -d generate-backend-XXXXXXX)
+tmpdir=$(mktemp --tmpdir -d js-sha1-versioned-XXXXXXX)
 trap 'rm -rf "${tmpdir}"' EXIT
 
 while [ $# -gt 0 ]; do

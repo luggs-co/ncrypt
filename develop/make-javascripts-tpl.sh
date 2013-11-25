@@ -45,7 +45,7 @@ findjs() {
 	printf '"></script>\n'
 	printf '<script type="text/javascript">\n'
 	printf '\twindow.ezcrypt_crypto_backend_url = "'
-	findjs 'jslibs/crypto-backends/sjcl'
+	findjs 'jslibs/sjcl'
 	printf '";\n'
 	printf '\thead.load(window.ezcrypt_crypto_backend_url);\n'
 	printf '\n'

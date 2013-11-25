@@ -1,6 +1,6 @@
 /// uglifyjs options: -c -m
 
-///#source 1 1 Blob.js
+///#source 1 1 Blob.js/Blob.js
 /* Blob.js
  * A Blob implementation.
  * 2013-06-20
@@ -168,7 +168,7 @@ else var Blob = (function (view) {
 	};
 }(self));
 
-///#source 1 1 FileSaver.js
+///#source 1 1 FileSaver.js/FileSaver.js
 /* FileSaver.js
  * A saveAs() FileSaver implementation.
  * 2013-10-21
@@ -408,8 +408,6 @@ if (typeof module !== 'undefined') module.exports = saveAs;
  * 
  * @version: 0.4
  * @author: NovaKing (novaking@eztv.se)
- * @version: 0.4-1
- * @author: Stefan Bühler
  * 
  * General functions that get used within the website
  * 

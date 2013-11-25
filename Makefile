@@ -7,10 +7,10 @@ all: $(CRYPTO_BACKENDS) js-tpl
 .PHONY: all $(JAVASCRIPTS) js-tpl
 
 js-sjcl:
-	./develop/js-preprocess.sh www/jslibs/crypto-backends/sjcl.backend.js | ./develop/js-sha1-versioned.sh www/jslibs/crypto-backends/sjcl -
+	./develop/js-preprocess.sh source/sjcl.backend.js www/jslibs/sjcl
 
 js-main:
-	cd www/jslibs; ../../develop/js-sha1-versioned.sh main Blob.js FileSaver.js core.js
+	cd source; ../develop/js-sha1-versioned.sh ../www/jslibs/main Blob.js/Blob.js FileSaver.js/FileSaver.js core.js
 
 js-tpl: $(JAVASCRIPTS)
 	./develop/make-javascripts-tpl.sh

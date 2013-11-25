@@ -1,3 +1,9 @@
 [submodule "sjcl"]
-	path = www/jslibs/crypto-backends/sjcl
+	path = source/sjcl
 	url = https://github.com/bitwiseshiftleft/sjcl.git
+[submodule "Blob.js"]
+	path = source/Blob.js
+	url = https://github.com/eligrey/Blob.js.git
+[submodule "FileSaver.js"]
+	path = source/FileSaver.js
+	url = https://github.com/eligrey/FileSaver.js

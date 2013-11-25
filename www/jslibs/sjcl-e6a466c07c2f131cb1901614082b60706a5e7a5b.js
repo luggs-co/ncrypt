@@ -893,7 +893,7 @@ sjcl.misc.pbkdf2 = function (password, salt, count, length, Prff) {
 
   return out;
 };
-/* sjcl_md5.js */
+/* sjcl-md5/sjcl-md5.js */
 /** @fileOverview Javascript MD5 implementation.
  *
  * Based on the implementation in RFC 1321, and on the SJCL

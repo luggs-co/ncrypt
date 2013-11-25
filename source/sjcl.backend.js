@@ -17,7 +17,7 @@ var global = typeof window !== "undefined" && window !== null ? window : this;
 #INCLUDE sjcl/core/codecString.js
 #INCLUDE sjcl/core/hmac.js
 #INCLUDE sjcl/core/pbkdf2.js
-#INCLUDE sjcl_md5.js
+#INCLUDE sjcl-md5/sjcl-md5.js
 #INCLUDE sjcl/core/sha1.js
 #INCLUDE sjcl/core/sha256.js
 #INCLUDE sjcl/core/random.js

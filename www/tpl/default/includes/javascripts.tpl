@@ -1,6 +1,6 @@
 <script type="text/javascript" src="jslibs/head-1.0.2-1.min.js"></script>
 <script type="text/javascript">
-	window.ezcrypt_crypto_backend_url = "jslibs/crypto-backends/sjcl-1b7223863f77bb6f34fbb4d0754a5e43b55a9a14.min.js";
+	window.ezcrypt_crypto_backend_url = "jslibs/sjcl-e6a466c07c2f131cb1901614082b60706a5e7a5b.min.js";
 	head.load(window.ezcrypt_crypto_backend_url);
 
 	head.load(
@@ -8,6 +8,6 @@
 		"jslibs/jquery.textchange.min.js",
 		"jslibs/codemirror/codemirror.min.js",
 		"jslibs/codemirror/mode/combined.min.js",
-		"jslibs/main-ad522ac51ac6939b61d7a73ac5eb8bbd51c4efda.min.js"
+		"jslibs/main-a4448a4602e8fc9a6512ef56face11ee42e9d098.min.js"
 	);
 </script>

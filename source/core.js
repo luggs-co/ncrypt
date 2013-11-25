@@ -3,8 +3,6 @@
  * 
  * @version: 0.4
  * @author: NovaKing (novaking@eztv.se)
- * @version: 0.4-1
- * @author: Stefan Bühler
  * 
  * General functions that get used within the website
  * 

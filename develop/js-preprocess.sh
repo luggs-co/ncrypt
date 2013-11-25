@@ -17,4 +17,9 @@ preprocess() {
 	done
 }
 
-(cd "$(dirname "$1")"; preprocess ) < "$1"
+tmpdir=$(mktemp --tmpdir -d js-preprocess-XXXXXXX)
+trap 'rm -rf "${tmpdir}"' EXIT
+
+(cd "$(dirname "$1")"; preprocess ) < "$1" > "${tmpdir}/all.js"
+
+"$(dirname "$(readlink -f "$0")")"/js-sha1-versioned.sh "$2" - < "${tmpdir}/all.js"
