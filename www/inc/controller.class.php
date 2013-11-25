@@ -41,15 +41,8 @@
 			require_once dirname( __FILE__ ) . '/paste.class.php';
 
 			$pastes = new Paste();
-			$template->assign( 'pastes', $pastes );
 
 			$paste = $pastes->get( $id );
-
-			$template->assign( 'paste_id', $id );
-			$template->assign( 'data', '' );
-			$template->assign( 'syntax', '' );
-			$template->assign( 'cipher', '' );
-			$template->assign( 'require_password', false );
 
 			// detect if any errors came through
 			switch( $paste )
@@ -64,7 +57,7 @@
 			}
 
 			// validate paste, check if password has been set
-			$validated = $pastes->validate_password( $password );
+			$validated = $pastes->validate_password( $paste, $password );
 
 			switch( $validated )
 			{
@@ -74,7 +67,6 @@
 				// prompt user for password
 
 				$template->assign( 'meta_title', 'EZCrypt - Paste requires password' );
-				$template->assign( 'require_password', true );
 				$template->render( 403, 'paste.tpl' );
 				break;
 
@@ -83,11 +75,12 @@
 			case EZCRYPT_NO_PASSWORD:
 				// no password, show paste
 
-				$output = array(
-					'data' => $paste['data'],
-					'syntax' => $paste['syntax'],
-					'cipher' => $paste['cipher'],
-				);
+				if ( 'html' !== $template->format() ) {
+					$output = $pastes->read( $paste );
+				} else {
+					// read paste via javascript to make basic page loading faster
+					$output = array();
+				}
 
 				$template->assign( 'meta_title', 'EZCrypt - Paste' );
 				$template->render( 200, 'paste.tpl', $output );
@@ -104,9 +97,6 @@
 			$template = $this->template;
 
 			require_once dirname( __FILE__ ) . '/paste.class.php';
-
-			$pastes = new Paste();
-			$template->assign( 'pastes', $pastes );
 
 			// new paste
 			$template->assign( 'norobots', false );

@@ -14,6 +14,9 @@ $( function() {
 	var console = ('undefined' === typeof window.console) ? { } : window.console;
 	if ('undefined' === typeof console.log) console.log = function(){};
 
+	// data for fetched paste
+	var paste = { data: '', cipher: '', syntax: '', key: false };
+
 	if (typeof Worker !== 'undefined' && typeof window.ezcrypt_worker === 'undefined') {
 		worker = new Worker(window.ezcrypt_crypto_backend_url);
 		worker_pending = {};
@@ -135,12 +138,11 @@ $( function() {
 
 	function decrypt_update()
 	{
-		$( '#content_container' ).hide();
 		$( '#decrypting' ).hide();
 
-		var key = window.location.hash.substring( 1 );
-		var data = $( '#data' ).val();
-		var cipher = $( '#cipher' ).val();
+		var key = paste.key || window.location.hash.substring( 1 );
+		var data = paste.data;
+		var cipher = paste.cipher;
 		if ('' == data) {
 			$( '#askpassword' ).show();
 			$( '#typepassword' ).focus();
@@ -182,7 +184,7 @@ $( function() {
 						console.log(e);
 					}
 
-					editor.setOption( 'mode', $( '#syntax' ).val() );
+					editor.setOption( 'mode', paste.syntax );
 					editor.setValue( output );
 
 					$( '#showhex' ).hide();
@@ -195,7 +197,7 @@ $( function() {
 						console.log(e);
 					}
 
-					var syntax = $( '#syntax' ).val();
+					var syntax = paste.syntax;
 					var hide_hex = false;
 					try {
 						if (blob && syntax.match(/^image\//)) {
@@ -234,33 +236,41 @@ $( function() {
 		})
 	}
 
-	// when a password is assigned to a paste
-	// the page doesn't get the encrypted data until your supply the correct password
-	// this function handles the ajax calling to validate the password and return the data
-	function requestData()
+	// load paste data
+	function requestData(initialLoad)
 	{
-		var password = window.ezcrypt_backend.sha( $( '#typepassword' ).val() );
+		var password = '';
 		var url = window.location.href;
 		var hash = window.location.hash;
 		var index_of_hash = url.indexOf( hash ) || url.length;
 		var hashless_url = url.substr( 0, index_of_hash );
 
+		if (!initialLoad) {
+			password = 'p=' + window.ezcrypt_backend.sha( $( '#typepassword' ).val() );
+		}
+		$( '#decrypting' ).show();
+
 		$.ajax( {
 			url: hashless_url,
 			type: 'POST',
 			dataType: 'json',
-			data: 'p=' + password,
+			data: password,
 			cache: false,
 			success: function( json ) {
 				// success, assign the data accordingly
-				$( '#data' ).val( json.data );
-				$( '#syntax' ).val( json.syntax );
-				$( '#cipher' ).val( json.cipher );
+				paste.data = json.data;
+				paste.syntax = json.syntax;
+				paste.cipher = json.cipher;
 
 				decrypt_update();
 			},
 			error: function() {
-				alert( 'bad password!' );
+				if (initialLoad) {
+					// show dialogs
+					decrypt_update();
+				} else {
+					alert( 'bad password!' );
+				}
 			}
 		} );
 	}
@@ -468,9 +478,6 @@ $( function() {
 			readOnly: true,
 			onChange: onCodeChange
 		} );
-
-		editor.setOption( 'mode', $( '#syntax' ).val() );
-		editor.focus();
 	}
 
 	/* wait until we have a key (may have to wait for some entropy from user inputs) */
@@ -515,10 +522,12 @@ $( function() {
 	$( '#new_usepassword' ).change( function() { if( this.checked ) { $( '#new_typepassword' ).show(); } else { $( '#new_typepassword' ).hide(); } } );
 
 	if ($( '#askpassword').length) {
+		$( '#content_container' ).hide();
+
 		/* want to show a paste */
-		$( '#submitpassword' ).bind( 'click', requestData );
+		$( '#submitpassword' ).bind( 'click', function() { requestData(false); } );
 		$( '#submitkey' ).bind( 'click', function() {
-			window.location = window.location + '#' + $( '#typekey' ).val();
+			paste.key = $( '#typekey' ).val();
 			decrypt_update();
 		});
 		$( '#typepassword,#typekey' ).live( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
@@ -546,8 +555,14 @@ $( function() {
 			$( '#content_container' ).toggle();
 		})
 
-		/* start first try to decrypt it and show dialogs that may be needed */
-		decrypt_update();
+		if (window.ezcrypt_paste) {
+			paste = window.ezcrypt_paste;
+			decrypt_update();
+		}
+		else {
+			/* fetch paste */
+			requestData(true);
+		}
 	}
 
 } );

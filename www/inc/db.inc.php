@@ -24,12 +24,21 @@
 		return $__db;
 	}
 
-	// returns assoc array with additional entry age => time() - added
+	// returns assoc array (id,added,ttl,password) with additional entry age => time() - added
+	// doesn't need to include data,syntax,crypto
 	function db_get($id)
 	{
 		$db = db_connection();
 
 		return db_backend_get($db, (int) $id);
+	}
+
+	// returns actual data: data,syntax,crypto and ttl
+	function db_read($id)
+	{
+		$db = db_connection();
+
+		return db_backend_read($db, (int) $id);
 	}
 
 	function db_add($data, $syntax, $ttl, $password, $cipher)

@@ -43,9 +43,10 @@
 			}
 		}
 
-		public function format( $format )
+		public function format( $format = null )
 		{
-			$this->format = $format;
+			if (null !== $format) $this->format = $format;
+			return $this->format;
 		}
 
 		public function status_text( $code )

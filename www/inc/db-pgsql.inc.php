@@ -20,7 +20,26 @@
 		// grab paste from database
 		$sql = '
 			SELECT
-				*, (EXTRACT(EPOCH FROM now()) - added ) as age
+				"id", "added", "ttl", "password", (EXTRACT(EPOCH FROM now()) - added ) as age
+			FROM
+				pastes
+			WHERE
+				id = $1
+			LIMIT
+				1
+			';
+
+		$res = pg_query_params($db, $sql, array($id))  or die("Failed to execute query '$sql'");
+
+		return pg_fetch_assoc($res);
+	}
+
+	function db_backend_read($db, $id)
+	{
+		// grab paste from database
+		$sql = '
+			SELECT
+				"data", "syntax", "ttl", "crypto"
 			FROM
 				pastes
 			WHERE

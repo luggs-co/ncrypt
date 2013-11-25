@@ -11,9 +11,6 @@
 		<input type="text" id="typekey" style="width: 450px;" autocomplete="off" />&nbsp;
 		<input type="button" id="submitkey" value="Decrypt" />
 	</div>
-	<input type="hidden" name="syntax" id="syntax" value="<?=htmlspecialchars($syntax);?>" />
-	<input type="hidden" name="data" id="data" value="<?=htmlspecialchars($data);?>" />
-	<input type="hidden" name="cipher" id="cipher" value="<?=htmlspecialchars($cipher);?>" />
 
 	<div id="newpaste">
 		<?php $this->incl('includes/new.tpl'); ?>
@@ -29,7 +26,7 @@
 		<label class="tool-fullscreen" for="tool-fullscreen" title="Fullscreen"></label> <input type="checkbox" id="tool-fullscreen" />
 	</div>
 	<div id="wrap" style="clear: both;"></div>
-	
+
 	<div id="decrypting"></div>
 	<div id="alternate_content"></div>
 	<div id="content_container">

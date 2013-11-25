@@ -22,7 +22,30 @@
 		// grab paste from database
 		$sql = '
 			SELECT
-				*, ( UNIX_TIMESTAMP() - added ) as age
+				`id`, `added`, `ttl`, `password`, ( UNIX_TIMESTAMP() - added ) as age
+			FROM
+				pastes
+			WHERE
+				id = ?
+			LIMIT
+				1
+			';
+
+		$stmt = $db->prepare($sql);
+		$stmt->bind_param('i', $id);
+		$stmt->execute();
+
+		$res = $stmt->get_result();
+
+		return $res->fetch_array(MYSQLI_ASSOC);
+	}
+
+	function db_backend_read($db, $id)
+	{
+		// grab paste from database
+		$sql = '
+			SELECT
+				`data`, `syntax`, `ttl`, `crypto`
 			FROM
 				pastes
 			WHERE

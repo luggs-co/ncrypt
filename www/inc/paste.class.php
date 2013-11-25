@@ -3,12 +3,12 @@
 	define( 'EZCRYPT_MISSING_DATA', -1 );
 	define( 'EZCRYPT_DOES_NOT_EXIST', 1 );
 	define( 'EZCRYPT_HAS_EXPIRED', 2 );
-	
+
 	define( 'EZCRYPT_NO_PASSWORD', 10 );
 	define( 'EZCRYPT_PASSWORD_SUCCESS', 11 );
 	define( 'EZCRYPT_PASSWORD_FAILED', 12 );
 	define( 'EZCRYPT_PASSWORD_REQUIRED', 13 );
-	
+
 	/**
 	 * Basic PHP based paste system
 	 * 
@@ -21,41 +21,53 @@
 	 **/
 	class Paste
 	{
-		private $paste;
 		private $id;
-		
+
 		function get( $id )
 		{
-			$this->id = alphaID( $id, true );
+			$id = alphaID( $id, true );
 
-			if (false !== ( $paste = db_get( $this->id ) ))
+			if (false !== ( $paste = db_get( $id ) ))
 			{
-				$this->paste = $paste; // assign to class variable
-				
 				// check to see if this paste has expired
-				$expired = $this->has_expired();
-				if( $expired === false )
-				{
-					switch ($paste['crypto']) {
-					case 'PIDCRYPT':
-						$paste['cipher'] = 'AES-128-CBC';
-						break;
-					case 'CRYPTO_JS':
-						$paste['cipher'] = 'AES-256-OFB';
-						break;
-					default:
-						$paste['cipher'] = $paste['crypto'];
-					}
+				$expired = $this->has_expired( $paste );
+				if( $expired === false ) return $paste;
 
-					return $paste;
-				}
-				
 				return $expired;
 			}
-			
+
 			return EZCRYPT_DOES_NOT_EXIST;
 		}
-		
+
+		function read( $paste_meta )
+		{
+			if (false !== ( $paste = db_read( $paste_meta['id'] ) ))
+			{
+				switch ($paste['crypto']) {
+				case 'PIDCRYPT':
+					$cipher = 'AES-128-CBC';
+					break;
+				case 'CRYPTO_JS':
+					$cipher = 'AES-256-OFB';
+					break;
+				default:
+					$cipher = $paste['crypto'];
+				}
+
+				if ( -100 == $paste['ttl'] )
+				{
+					// one-time only paste, delete it now
+					db_delete( $paste_meta['id'] );
+				}
+
+				return array(
+					'data' => $paste['data'],
+					'syntax' => $paste['syntax'],
+					'cipher' => $cipher,
+				);
+			}
+		}
+
 		function add( $data, $syntax, $ttl, $password, $cipher )
 		{
 			if (!empty($password)) {
@@ -70,13 +82,13 @@
 			// submit new paste to server
 			return db_add($data, $syntax, $ttl, $password, $cipher);
 		}
-		
-		function validate_password( $password )
+
+		function validate_password( $paste, $password )
 		{
 			// if we haven't gotten a paste yet.
-			if( empty( $this->paste ) ) return EZCRYPT_MISSING_DATA;
+			if( empty( $paste ) ) return EZCRYPT_MISSING_DATA;
 
-			if (!empty($this->paste['password']))
+			if (!empty($paste['password']))
 			{
 				if (empty($password))
 				{
@@ -84,18 +96,18 @@
 					return EZCRYPT_PASSWORD_REQUIRED;
 				}
 
-				if (strlen($this->paste['password']) == 40 && '$' != $this->paste['password'][0])
+				if (strlen($paste['password']) == 40 && '$' != $paste['password'][0])
 				{
 					// old style, salted with id
-					$password = sha1($this->paste['id'] . $password);
+					$password = sha1($paste['id'] . $password);
 				}
 				else
 				{
 					// crypted
-					$password = crypt($password, $this->paste['password']);
+					$password = crypt($password, $paste['password']);
 				}
 
-				if (0 == strcmp($password, $this->paste['password']))
+				if (0 == strcmp($password, $paste['password']))
 				{
 					// correct, send user the required data
 					return EZCRYPT_PASSWORD_SUCCESS;
@@ -107,52 +119,28 @@
 
 			return EZCRYPT_NO_PASSWORD;
 		}
-		
-		function has_expired()
+
+		function has_expired( $paste )
 		{
 			// if we haven't gotten a paste yet.
-			if( empty( $this->paste ) ) return EZCRYPT_MISSING_DATA;
-			
+			if( empty( $paste ) ) return EZCRYPT_MISSING_DATA;
+
 			// determine if the paste has expired.
 			// if ttl is set to -1 that means it a perm paste
 			// if ttl is set to -100 that means this is a one-time only paste
 			// otherwise test to see if the ttl duration has been met
-			if ( -100 == $this->paste['ttl'] )
+			if ( -100 == $paste['ttl'] )
 			{
-				// one-time only paste, delete it now
-				db_delete($this->id);
+				// one-time only paste, delete on read (not now)
+				return false;
 			}
-			else if( $this->paste['ttl'] != -1 && $this->paste['age'] > $this->paste['ttl'] )
+			else if( $paste['ttl'] != -1 && $paste['age'] > $paste['ttl'] )
 			{
 				// this paste is flagged as expired, time to clean up
-				db_delete($this->id);
-				unset( $this->paste ); // cleanup
+				db_delete( $paste['id'] );
 				return EZCRYPT_HAS_EXPIRED;
 			}
-			
+
 			return false;
-		}
-		
-		function get_crypto()
-		{
-			// default to crypto-js 
-			if( empty( $this->paste ) ) { return 'CRYPTO_JS'; }
-			
-			// return the type of crypto that was used for the paste
-			return $this->paste['crypto'];
-		}
-		
-		function selected_syntax( $syntax )
-		{
-			// determine if syntax is the one selected 
-			if( empty( $this->paste ) )
-			{
-				if( $syntax == 'text/plain' ) return ' selected';
-				return '';
-			}
-			
-			if( $this->paste['syntax'] == $syntax ) return ' selected';
-			
-			return '';
 		}
 	}

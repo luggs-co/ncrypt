@@ -8,6 +8,6 @@
 		"jslibs/jquery.textchange.min.js",
 		"jslibs/codemirror/codemirror.min.js",
 		"jslibs/codemirror/mode/combined.min.js",
-		"jslibs/main-a4448a4602e8fc9a6512ef56face11ee42e9d098.min.js"
+		"jslibs/main-b73d60062cfe4aac20346174f9e1f2c516b54916.min.js"
 	);
 </script>
