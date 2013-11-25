@@ -1,8 +1,12 @@
+/// uglifyjs options: -c -m
 
 var global = typeof window !== "undefined" && window !== null ? window : this;
 
 (function() {
 	var window = global;
+
+	var console = ('undefined' === typeof global.console) ? { } : global.console;
+	if ('undefined' === typeof console.log) console.log = function(){};
 
 /* sjcl/core/sjcl.js */
 /** @fileOverview Javascript cryptography implementation.
