@@ -101,20 +101,21 @@ $( function() {
 		}
 	}
 
-	function display_binary_hex(bytes, syntax)
+	function display_binary_hex(bytes, syntax, limit)
 	{
+		if (!limit) limit = 100*1024;
 		var offprefix = bytes.length.toString(16).replace(/./g, '0')
-		bytes = bytes.slice();
 		var BYTES_PER_LINE = 20;
 		var lines = [], bline, offset = 0, line, i, j;
 		lines.push('Binary file of type: ' + syntax + "\n");
 		lines.push("\n");
-		while (bytes.length > 0) {
-			if (lines.length > 5000) {
+		while (offset < bytes.length) {
+			if (limit >= 0 && offset >= limit) {
 				lines.push("\n");
 				lines.push("too much data, stopping now\n");
+				break;
 			}
-			bline = bytes.splice(0, BYTES_PER_LINE);
+			bline = bytes.slice(offset, offset + BYTES_PER_LINE);
 			line = (offprefix + offset.toString(16)).slice(-offprefix.length) + ':';
 			offset += bline.length;
 			for (i = 0; i < BYTES_PER_LINE; ) {
@@ -213,8 +214,8 @@ $( function() {
 						console.log(e);
 					}
 
-//					editor.setOption( 'mode', 'text/plain' );
-//					editor.setValue( display_binary_hex(output, syntax) );
+					editor.setOption( 'mode', 'text/plain' );
+					editor.setValue( display_binary_hex(output, syntax) );
 
 					$( '#showhex' ).toggle(hide_hex);
 					$( '#content_container').toggle(!hide_hex);
