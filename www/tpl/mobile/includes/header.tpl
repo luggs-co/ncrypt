@@ -13,10 +13,8 @@
 		<meta http-equiv="pragma" content="no-cache" />
 		<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<link rel="stylesheet" href="css/mobile.css" />
-		<link rel="stylesheet" href="css/codemirror.css" />
+		<?php $this->incl('includes/css.tpl'); ?>
 		<link rel="shortcut icon" href="favicon.ico" />
-
 		<?php $this->incl('includes/javascripts.tpl'); ?>
 	</head>
 	<body>

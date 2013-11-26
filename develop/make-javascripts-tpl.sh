@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tmpdir=$(mktemp --tmpdir -d generate-backend-XXXXXXX)
+tmpdir=$(mktemp --tmpdir -d make-javascripts-tpl-XXXXXXX)
 trap 'rm -rf "${tmpdir}"' EXIT
 
 findjs2() {
@@ -52,7 +52,7 @@ findjs() {
 	printf '\thead.load(\n'
 
 	first=1
-	for s in jquery jquery.textchange codemirror/codemirror codemirror/mode/combined main; do
+	for s in jquery jquery.textchange codemirror codemirror-modes main; do
 		if [ 0 -eq "${first}" ]; then printf ',\n'; fi
 		printf '\t\t"'
 		findjs "jslibs/${s}"

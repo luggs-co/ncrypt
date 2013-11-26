@@ -7,3 +7,6 @@
 [submodule "FileSaver.js"]
 	path = source/FileSaver.js
 	url = https://github.com/eligrey/FileSaver.js
+[submodule "CodeMirror"]
+	path = source/CodeMirror
+	url = https://github.com/marijnh/CodeMirror.git

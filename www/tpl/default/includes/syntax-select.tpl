@@ -18,7 +18,7 @@ Formatting:
 			}
 		}
 		if (!$matched) {
-			echo '<option disabled="disabled" class="header">- Unknown format -</option>'."\n";
+			echo '<option disabled="disabled" class="header unknown">- Unknown format -</option>'."\n";
 			echo '<option value="'.htmlentities($syntax).'" selected>&nbsp;&nbsp;'.htmlentities($syntax).'</option>'."\n";
 		}
 	}

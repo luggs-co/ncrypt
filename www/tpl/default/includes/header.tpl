@@ -11,7 +11,7 @@
 		<meta name="googlebot" content="noarchive" />
 		<?}?><meta http-equiv="cache-control" content="no-cache" />
 		<meta http-equiv="pragma" content="no-cache" />
-		<link rel="stylesheet" href="css/styles.min.css" />
+		<?php $this->incl('includes/css.tpl'); ?>
 		<link rel="shortcut icon" href="favicon.ico" />
 
 		<!--[if gte IE 9]>
