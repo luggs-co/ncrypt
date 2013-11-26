@@ -936,7 +936,7 @@ $( function() {
 			text.bind( 'textchange', encrypt_update_delayed );
 
 			// support ctrl+enter to send paste
-			text.live( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
+			text.bind( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
 
 			// hover effect when moving mouse over submit button
 			en.hover(
@@ -963,7 +963,7 @@ $( function() {
 			paste.key = $( '#typekey' ).val();
 			decrypt_update();
 		});
-		$( '#typepassword,#typekey' ).live( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
+		$( '#typepassword,#typekey' ).bind( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
 
 		$( '#new' ).bind( 'click', function() { $( '#new_text' ).html( '' ); $( '#new_result' ).val( '' ); $( '#newpaste' ).slideDown(); } );
 		$( '#clone' ).bind( 'click', function() {
