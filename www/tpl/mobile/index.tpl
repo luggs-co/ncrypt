@@ -3,25 +3,22 @@
 ?>
 
 	<script type="text/javascript">
-		var editor = ezcrypt.editor;
-		// welcome text that appears on home page encrypted with pidCrypt and crypto-js
+		// welcome text that appears on home page
 		// you can change this message but simply making a new encrypted text and decrypting
 		// it below
-		var key = 'MzksNTIsMTU5LDc4LDQ1LDQ1LDEwMSwxMjEsMTY2LDE4LDI4LDE3NSwyMzIsMTU1LDI5LDE1MSw4MCw1MSw1NCwxMTUsMTcsNTgsNjQsMjQxLDI0OSwxNDEsMTk1LDk3LDk0LDcsOSwyNDU=';
-		var welcome = 'Zr8mIp+HfTGf4fQT6fahIo6jABfRLct3FDlhTTLoviagn1GvT+mWuFPJf+ZIqZPZ9uDDm9ybrA2z19vnINF0wigEXHmz94ec\
+		window.ezcrypt_paste = {
+			key   : 'MzksNTIsMTU5LDc4LDQ1LDQ1LDEwMSwxMjEsMTY2LDE4LDI4LDE3NSwyMzIsMTU1LDI5LDE1MSw4MCw1MSw1NCwxMTUsMTcsNTgsNjQsMjQxLDI0OSwxNDEsMTk1LDk3LDk0LDcsOSwyNDU=',
+			data  : 'Zr8mIp+HfTGf4fQT6fahIo6jABfRLct3FDlhTTLoviagn1GvT+mWuFPJf+ZIqZPZ9uDDm9ybrA2z19vnINF0wigEXHmz94ec\
 MhjxfofdLMVGc1M07PxIwfk1CrALuxIE7AVWC4vUT9jdLqmKztAlvRXAh299UqsRiya3NCSohkSao+X3Zw8lbw8f77maWeqX\
 awV96ru/Bccc5Rl17wfWmupiZb2ix8OjQ+OQ2T4dlr9QWHavCVLEv/H1eON61P0GoQlp8W+gBY1rk3kab4rqxFAGTPjqNhaL\
 WIK7eqhKekFnF8qMpXI7e2ktsSqi3wDzzygUmOfvZ+JCa4qutEcUa9y4OW3OAf8pt8MeFKvoSHUcsA9q6KSJDvBl90PjWpTW\
 DrLTDDlEgKgZF7TlJmGgtdHuKrNl/EfpDwJwCxOXAaQ4sWasnhOgG6RSsaWWyxMSA9blZf5BnxN1ercSRToMft2IJiyVqffB\
 VoDLytU7LUVcDLwqDy9hzXifzEeGeeBdS55rBYfSHMhLI4vIEioiyQUjOloyk+2B9ws41DJEOgbcuxPDpLiMIZk5+WYDHpSE\
-KeXrvOb/x8e7UZu+XTOV6xRp25U=';
-		var cipher = 'AES-256-OFB';
-
-		editor.setOption( 'readOnly', true );
-		editor.setOption( 'lineNumbers', false );
-		editor.setOption( 'mode', 'htmlmixed' );
-
-		editor.setValue( ezcrypt.decrypt( key, welcome, cipher ) );
+KeXrvOb/x8e7UZu+XTOV6xRp25U=',
+			cipher: 'AES-256-OFB',
+			syntax: 'htmlmixed',
+			highlight_options: { lineNumbers: false }
+		};
 	</script>
 
 	<div id="alternate_content"></div>

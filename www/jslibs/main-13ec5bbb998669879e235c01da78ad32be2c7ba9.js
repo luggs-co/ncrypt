@@ -420,7 +420,7 @@ $( function() {
 	if ('undefined' === typeof console.log) console.log = function(){};
 
 	// data for fetched paste
-	var paste = { data: '', cipher: '', syntax: '', key: false };
+	var paste = { data: '', cipher: '', syntax: '', key: false, highlight_options: { } };
 
 	if (typeof Worker !== 'undefined' && typeof window.ezcrypt_worker === 'undefined') {
 		worker = new Worker(window.ezcrypt_crypto_backend_url);
@@ -542,6 +542,22 @@ $( function() {
 		return lines.join('');
 	}
 
+	function set_new_syntax( syntax )
+	{
+		var s = $( '#new_syntax' );
+		if (s.val() === syntax) return;
+		s.val(syntax);
+		if (s.val() === syntax) return;
+		if ( $( '#new_syntax .header.unknown' ).length == 0 ) {
+			s.append( $( '<option disabled="disabled" class="header unknown">- Unknown format -</option>' ) );
+		}
+		var o = $( '<option>' );
+		o.prop( 'value', syntax ).text( syntax );
+		o.html( '&nbsp;&nbsp;' + o.html() );
+		s.append( o );
+		o.prop( 'selected', true );
+	}
+
 	function decrypt_update()
 	{
 		$( '#decrypting' ).hide();
@@ -571,7 +587,6 @@ $( function() {
 		var t = new TimeDiff();
 		window.ezcrypt.async_decrypt([key, data, cipher], function (output, error) {
 			if (output) {
-				paste.result = output;
 				// display duration
 				time_decryption = t.getDiff();
 				$( '#execute' ).html( 'decryption: ' + time_decryption + 'ms,');
@@ -595,6 +610,9 @@ $( function() {
 					editor.setValue( output );
 
 					$( '#showhex' ).hide();
+					$( '#clone' ).show();
+					// copy syntax if paste is a real paste, not the index example
+					if ( $( '#clone' ).length ) set_new_syntax( paste.syntax );
 				}
 				else {
 					try {
@@ -623,8 +641,16 @@ $( function() {
 					editor.setOption( 'mode', 'text/plain' );
 					editor.setValue( display_binary_hex(output, syntax) );
 
+					$( '#clone' ).hide();
 					$( '#showhex' ).toggle(hide_hex);
 					$( '#content_container').toggle(!hide_hex);
+				}
+
+				var p = paste.highlight_options || { };
+				for (var k in p) {
+					if ( p.hasOwnProperty( k ) ) {
+						editor.setOption( k, p[k] );
+					}
 				}
 
 				if (blob) {
@@ -878,7 +904,7 @@ $( function() {
 	if( document.getElementById( 'content' ) )
 	{
 		// load up our editor
-		window.ezcrypt.editor = editor = CodeMirror.fromTextArea( document.getElementById( 'content' ), {
+		editor = CodeMirror.fromTextArea( document.getElementById( 'content' ), {
 			lineNumbers: true,
 			matchBrackets: false,
 			lineWrapping: false,
@@ -928,7 +954,7 @@ $( function() {
 
 	$( '#new_usepassword' ).change( function() { if( this.checked ) { $( '#new_typepassword' ).show(); } else { $( '#new_typepassword' ).hide(); } } );
 
-	if ($( '#askpassword').length) {
+	if ($( '#clone').length) {
 		$( '#content_container' ).hide();
 
 		/* want to show a paste */
@@ -940,7 +966,11 @@ $( function() {
 		$( '#typepassword,#typekey' ).live( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
 
 		$( '#new' ).bind( 'click', function() { $( '#new_text' ).html( '' ); $( '#new_result' ).val( '' ); $( '#newpaste' ).slideDown(); } );
-		$( '#clone' ).bind( 'click', function() { $( '#new_text' ).html( editor.getValue() ).trigger( 'textchange' ); $( '#newpaste' ).slideDown(); } );
+		$( '#clone' ).bind( 'click', function() {
+			set_new_syntax( paste.syntax );
+			$( '#new_text' ).html( editor.getValue() ).trigger( 'textchange' );
+			$( '#newpaste' ).slideDown();
+		} );
 
 		$( '#tool-wrap' ).bind( 'click', function() {
 			var checked = $( '#tool-wrap' ).is( ':checked' );
@@ -970,6 +1000,10 @@ $( function() {
 			/* fetch paste */
 			requestData(true);
 		}
+	}
+	else if (window.ezcrypt_paste) {
+		paste = window.ezcrypt_paste;
+		decrypt_update();
 	}
 
 } );
