@@ -15,7 +15,7 @@ all of your pastes would still be safe.<br />
 <br />
 How it works (replace AES 128bit with 256 bit):<br />
 <br />
-<img src="css/how-it-works.png" width="850" height="328" /><br />
+<img src="img/how-it-works.png" width="850" height="328" /><br />
 <br />
 When you upload a paste, Javascript generates a random key which is used to encrypt your data.<br />
 You can see what your paste will look like to our server by holding the mouse over the "Submit" button.<br />

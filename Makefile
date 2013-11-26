@@ -24,10 +24,10 @@ js-tpl: $(JAVASCRIPTS)
 
 
 css-default:
-	./develop/css-sha1-versioned.sh www/css/default source/CodeMirror/lib/codemirror.css source/codemirror.css source/default.css
+	./develop/css-sha1-versioned.sh www/css/default source/CodeMirror/lib/codemirror.css source/codemirror.css source/common.css source/default.css
 
 css-mobile:
-	./develop/css-sha1-versioned.sh www/css/mobile source/CodeMirror/lib/codemirror.css source/codemirror.css source/mobile.css
+	./develop/css-sha1-versioned.sh www/css/mobile source/CodeMirror/lib/codemirror.css source/codemirror.css source/common.css source/mobile.css
 
 css-tpl: $(STYLESHEETS)
 	./develop/make-css-tpl.sh default

@@ -502,7 +502,7 @@ $( function() {
 		editor = CodeMirror.fromTextArea( document.getElementById( 'content' ), {
 			lineNumbers: true,
 			matchBrackets: false,
-			lineWrapping: false,
+			lineWrapping: true,
 			readOnly: true,
 			onChange: onCodeChange
 		} );
@@ -569,17 +569,14 @@ $( function() {
 
 		$( '#tool-wrap' ).bind( 'click', function() {
 			var checked = $( '#tool-wrap' ).is( ':checked' );
-			$( '.tool-wrap' ).toggleClass('tool-wrap-on', checked);
 			editor.setOption( 'lineWrapping', checked );
 		} );
 		$( '#tool-numbers' ).bind( 'click', function() {
 			var checked = $( '#tool-numbers' ).is( ':checked' );
-			$( '.tool-numbers' ).toggleClass( 'tool-numbers-on', checked );
 			editor.setOption( 'lineNumbers', checked );
 		} );
 		$( '#tool-fullscreen' ).bind( 'click', function() {
 			var checked = $( '#tool-fullscreen' ).is( ':checked' );
-			$( '.tool-fullscreen' ).toggleClass( 'tool-fullscreen-on', checked );
 			$( '#holder' ).css( 'width', checked ? '100%' : '' );
 		} );
 
