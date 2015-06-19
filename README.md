@@ -13,7 +13,7 @@ TODO: https://gist.github.com/bdc17313ffb423ff22f3 (Comments welcome)
 * PHP
 * Database: MySQL (or compatible) or PostgreSQL
 
-## Dev Dependancies
+## Dev Dependencies
 
 * cssmin
 * uglifyjs
