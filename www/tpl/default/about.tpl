@@ -1,11 +1,11 @@
 <?php
 	$this->incl('includes/header.tpl');
 ?>
-<h1>About EZCrypt</h1>
+<h1>About <?=$site_name;?></h1>
 <br />
-We created EZCrypt because we wanted to give you the power to protect your information from everyone,<br />
+We created <?=$site_name;?> because we wanted to give you the power to protect your information from everyone,<br />
 including us! In a typical private pastebin, you upload your data and you trust the security of the<br />
-server and the integrity of it's operators. With EZCrypt, you get a <a href="http://en.wikipedia.org/wiki/JavaScript" target="_blank">Javascript file</a> which encrypts your<br />
+server and the integrity of it's operators. With <?=$site_name;?>, you get a <a href="http://en.wikipedia.org/wiki/JavaScript" target="_blank">Javascript file</a> which encrypts your<br />
 paste using state of the art <a href="http://en.wikipedia.org/wiki/Advanced_Encryption_Standard" target="_blank">AES-256-OFB cipher</a> before it ever leaves your computer!<br />
 The link to your paste contains the key to decrypt it which you can share with whomever you want.<br />
 <br />

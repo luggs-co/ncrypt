@@ -9,4 +9,5 @@
 	url = https://github.com/eligrey/FileSaver.js
 [submodule "CodeMirror"]
 	path = source/CodeMirror
-	url = https://github.com/marijnh/CodeMirror.git
+	url = https://github.com/codemirror/CodeMirror.git
+	tag = 5.3.0

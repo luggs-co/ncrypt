@@ -2,6 +2,15 @@
 	background-color: #fff;
 	border: 1px SOLID #e0e0e0;
 	padding: 0px;
+	line-height: 14.5px;
 	width: 100%;
 	height: auto;
+}
+
+/* overwrite some codemirror themes using dotted lines */
+.cm-trailingspace {
+	text-decoration: none !important;
+}
+.cm-tab {
+	text-decoration: none !important;
 }

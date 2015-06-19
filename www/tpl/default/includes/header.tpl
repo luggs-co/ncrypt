@@ -1,15 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
 	<head>
 		<title><?=$meta_title?></title>
 		<base href="<?=$site_url?>" />
-		<meta name="description" content="EZCrypt - The original safer way to encrypt your pastes online!" />
-		<meta name="keywords" content="ezcrypt, encryption, pastebin, paste, secure, aes" />
+		<meta name="description" content="<?=$site_name;?> - The original safer way to encrypt your pastes online!" />
+		<meta name="keywords" content="ncrypt, ezcrypt, encryption, pastebin, paste, secure, aes, crypto" />
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-		<?if( !isset($norobots) || $norobots !== false ) {?><meta name="robots" content="noarchive" />
+		<?php if( !isset($norobots) || $norobots !== false ) { ?><meta name="robots" content="noarchive" />
 		<meta name="googlebot" content="nosnippet" />
 		<meta name="googlebot" content="noarchive" />
-		<?}?><meta http-equiv="cache-control" content="no-cache" />
+		<?php } ?><meta http-equiv="cache-control" content="no-cache" />
 		<meta http-equiv="pragma" content="no-cache" />
 		<?php $this->incl('includes/css.tpl'); ?>
 		<link rel="shortcut icon" href="favicon.ico" />
@@ -34,7 +34,7 @@
 		-->
 		<div id="holder">
 			<div id="header" class="gradient">
-				<a href="/">EZCrypt</a> <span class="small">v0.4</span> - Giving you the power to encrypt your information
+				<a href="/"><?=$site_name;?></a> <span class="small">v0.736</span> - Giving you the power to encrypt your information
 			</div>
 			<div id="menu">
 				<a href="<?=$site_url?>">Home</a>
@@ -43,10 +43,10 @@
 				<span class="small">&nbsp;</span>
 				<a href="<?=$site_contact?>">Contact</a>
 				<span class="small">&nbsp;</span>
-				<a href="ezcrypt">Ruby CLI script</a>
+				<a href="ncrypt">Ruby CLI script</a>
 				<span class="small">&nbsp;</span>
 				<a href="<?=$site_source?>" target="_blank">Sourcecode</a>
 				<span class="small">&nbsp;</span>
-				<div style="position: absolute; right: 0px; top: 10px;"><a href="http://flattr.com/thing/647627/EZCrypt" target="_blank"><img src="img/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" width="93" height="20" /></a></div>
+				<div style="position: absolute; right: 0px; top: 10px;"><a href="bitcoin:<?=$bitcoin_address;?>"><img src="img/bitcoin-button.png" alt="Donate to NCrypt" title="Donate to NCrypt" border="0" width="89" height="20" /></a></div>
 			</div>
 			<div id="main">

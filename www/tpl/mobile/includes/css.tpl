@@ -1,1 +1,1 @@
-<link rel="stylesheet" href="css/mobile-e626ec0e77bdbd5a1e67c1b98248e166c4eb8bed.min.css" />
+<link rel="stylesheet" href="css/mobile-768390a4ba27defe582dff9c6a9f71289fb5e543.min.css" />

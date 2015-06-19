@@ -27,6 +27,7 @@
 			foreach ($config['site'] as $key => $value) {
 				$this->assign('site_' . $key, $value);
 			}
+			$this->assign('cookie', $_COOKIE);
 		}
 
 		// assign template version
@@ -37,7 +38,7 @@
 
 		public function theme( $theme )
 		{
-			if( is_dir( dirname( __FILE__ ) . '/../tpl/' . $theme ) )
+			if( is_dir( __DIR__ . '/../tpl/' . $theme ) )
 			{
 				$this->theme = $theme;
 			}
@@ -53,10 +54,10 @@
 		{
 			switch ( $code )
 			{
-			case 200: return "OK";
-			case 403: return "Forbidden";
-			case 404: return "Not found";
-			default: throw new Exception( 'Unknown status code' );
+				case 200: return "OK";
+				case 403: return "Forbidden";
+				case 404: return "Not found";
+				default: throw new Exception( 'Unknown status code' );
 			}
 		}
 
@@ -73,20 +74,20 @@
 
 			switch ( $this->format )
 			{
-			case 'html':
-				$this->template_vars = array_merge( $this->template_vars, $object );
-				$this->incl( $template_name );
-				break;
-			case 'json':
-				header( 'Content-Type: application/json' );
-				echo json_encode( $object );
-				break;
-			case 'raw':
-				header( 'Content-Type: application/octet-stream' );
-				if (!empty( $object['syntax'] )) header( 'X-Syntax: ' . strip_unsafe_header( $object['syntax'] ) );
-				if (!empty( $object['cipher'] )) header( 'X-Cipher: ' . strip_unsafe_header( $object['cipher'] ) );
-				echo $object['data'];
-				break;
+				case 'html':
+					$this->template_vars = array_merge( $this->template_vars, $object );
+					$this->incl( $template_name );
+					break;
+				case 'json':
+					header( 'Content-Type: application/json' );
+					echo json_encode( $object );
+					break;
+				case 'raw':
+					header( 'Content-Type: application/octet-stream' );
+					if (!empty( $object['syntax'] )) header( 'X-Syntax: ' . strip_unsafe_header( $object['syntax'] ) );
+					if (!empty( $object['cipher'] )) header( 'X-Cipher: ' . strip_unsafe_header( $object['cipher'] ) );
+					echo $object['data'];
+					break;
 			}
 		}
 
@@ -94,7 +95,7 @@
 		{
 			if( $template_name === null ) throw new Exception( 'Missing template to render' );
 
-			$basedir = dirname( __FILE__ ) . '/../tpl/';
+			$basedir = __DIR__ . '/../tpl/';
 
 			if ( is_file ( $basedir . $this->theme . '/' . $template_name ) ) {
 				return $basedir . $this->theme . '/' . $template_name;

@@ -12,11 +12,11 @@
 
 		if (empty($conf['database']['type']) || 'mysql' == $conf['database']['type'])
 		{
-			require_once dirname( __FILE__ ) . '/db-mysql.inc.php';
+			require_once __DIR__ . '/db-mysql.inc.php';
 		}
 		else if ('pgsql' == $conf['database']['type'])
 		{
-			require_once dirname( __FILE__ ) . '/db-pgsql.inc.php';
+			require_once __DIR__ . '/db-pgsql.inc.php';
 		}
 
 		$__db = db_backend_connection();

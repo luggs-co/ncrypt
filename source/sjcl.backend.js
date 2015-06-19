@@ -138,14 +138,14 @@ sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity.
 		decrypt: function(key, block, cipher, options) {
 			block = sjcl.codec.base64.toBits(block);
 			switch (cipher) {
-			case 'AES-256-OFB':
-				return decode_output(aes_256_ofb_decrypt(key, block), options);
-				break;
-			case 'AES-128-CBC':
-				return decode_output(aes_128_cbc_decrypt(key, block), options).slice(0, -1); // slice removes trailing newline
-				break;
-			default:
-				throw ('cipher "' + cipher + '" not supported');
+				case 'AES-256-OFB':
+					return decode_output(aes_256_ofb_decrypt(key, block), options);
+					break;
+				case 'AES-128-CBC':
+					return decode_output(aes_128_cbc_decrypt(key, block), options).slice(0, -1); // slice removes trailing newline
+					break;
+				default:
+					throw ('cipher "' + cipher + '" not supported');
 			}
 		},
 
@@ -192,14 +192,14 @@ sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity.
 
 	if ('undefined' === typeof global.crypto_backends) global.crypto_backends = {};
 	global.crypto_backends['sjcl'] = b;
-	if ('undefined' === typeof global.ezcrypt_backend) global.ezcrypt_backend = b;
+	if ('undefined' === typeof global.ncrypt_backend) global.ncrypt_backend = b;
 }) ();
 
 if (typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope) {
 	self.onmessage = function (event) {
 		var data = event.data;
 		try {
-			self.postMessage({id: data.id, func: data.func, result: global.ezcrypt_backend[data.func].apply(this, data.arguments) });
+			self.postMessage({id: data.id, func: data.func, result: global.ncrypt_backend[data.func].apply(this, data.arguments) });
 		} catch (e) {
 			console.log("exception in crypto worker:")
 			console.log(e);

@@ -1,6 +1,6 @@
-# EZCrypt
+# NCrypt
 
-Home of ezcrypt.
+Home of ncrypt.
 
 This readme will get updated when a more polished version of the code is completed.
 
@@ -13,6 +13,12 @@ TODO: https://gist.github.com/bdc17313ffb423ff22f3 (Comments welcome)
 * PHP
 * Database: MySQL (or compatible) or PostgreSQL
 
+## Dev Dependancies
+
+* cssmin
+* uglifyjs
+* make
+
 ## Deploy
 
 www is the "public" base directory for your webserver.
@@ -23,7 +29,7 @@ the base url should be given as PATH_INFO (append as path to index.php), see res
 Configure database access and other customizations in www/inc/config-local.inc.php (you have to create it)
 
     <?php
-      $__config['database']['username'] = 'ezcrypt';
+      $__config['database']['username'] = 'ncrypt';
       $__config['database']['password'] = '...';
       $__config['database']['type'] = 'mysql'; // default if unset. for PostgreSQL use 'pgsql'
 

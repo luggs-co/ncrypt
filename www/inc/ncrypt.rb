@@ -111,7 +111,7 @@ OptionParser.new do |o|
 		opts[:pass] = true
 		opts[:password] = password unless password.nil?
 	}
-	o.on('-s', '--site SITE', "Post upload to another ezcrypt pastebin (default: https://ezcrypt.it)") { |s| opts[:site] = s }
+	o.on('-s', '--site SITE', "Post upload to another ncrypt pastebin (default: https://ncry.pt)") { |s| opts[:site] = s }
 	o.separator ""
 	o.separator "    If neither url nor filename was given, a final parameter can be used to specify it. Urls are autodetected."
 	o.separator ""
@@ -186,7 +186,7 @@ if opts[:url]
 	end
 
 else
-	uri = URI(opts[:site] || 'https://ezcrypt.it')
+	uri = URI(opts[:site] || 'https://ncry.pt')
 	if opts[:fn] != '-'
 		if opts[:mime].nil?
 			begin

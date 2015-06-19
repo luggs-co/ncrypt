@@ -3,3 +3,7 @@
 /.buildpath
 /.project
 /www/inc/config-local.inc.php
+/www/jslibs/codemirror-*
+/www/jslibs/main-*
+/www/jslibs/sjcl-*
+/www/css/*.css

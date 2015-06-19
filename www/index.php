@@ -1,5 +1,5 @@
 <?php
-	require_once dirname( __FILE__ ) . '/inc/controller.class.php';
+	require_once __DIR__ . '/inc/controller.class.php';
 
 	$controller = new Controller();
 	$password = REQUEST('p');
@@ -14,18 +14,18 @@
 		{
 			switch( $parts[0] )
 			{
-			case 'about':
-				$controller->about();
-				break;
-			case 'ezcrypt':
-				$controller->ezcrypt_script();
-				break;
-			case 'p': // "safe" urls working with all paste ids
-				$controller->show( count( $parts ) >= 2 ? $parts[1] : '', $password );
-				break;
-			default: // paste ids that are not "special"
-				$controller->show( $parts[0], $password );
-				break;
+			    case 'about':
+				    $controller->about();
+				    break;
+			    case 'ncrypt':
+				    $controller->ncrypt_script();
+				    break;
+			    case 'p': // "safe" urls working with all paste ids
+				    $controller->show( count( $parts ) >= 2 ? $parts[1] : '', $password );
+				    break;
+			    default: // paste ids that are not "special"
+				    $controller->show( $parts[0], $password );
+				    break;
 			}
 		}
 		elseif( !empty( $_POST ) )

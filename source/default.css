@@ -67,16 +67,28 @@ input[type="submit"]:active, input[type="button"]:active
 
 input[type="text"], input[type="password"]
 {
-	background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f9f9f9), color-stop(1, #ffffff) );
-	background: -moz-linear-gradient( center top, #f9f9f9 5%, #ffffff 100% );
-	background: -o-linear-gradient( top, rgb( 249, 249, 249 ), rgb( 255, 255, 255 ) );
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f9f9f9', endColorstr='#ffffff');
-	background-color: #ffffff;
+	background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #e1e1e1), color-stop(1, #f6f6f6) );
+	background: -moz-linear-gradient( center top, #e1e1e1 5%, #f6f6f6 100% );
+	background: -o-linear-gradient( top, rgb( 225, 225, 225 ), rgb( 246, 246, 246 ) );
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e1e1e1', endColorstr='#f6f6f6');
+	background-color: #f6f6f6;
 
 	border: 1px SOLID #d1c7ac;
 	color: #333333;
 	padding: 2px;
 	margin: 0px;
+}
+
+textarea
+{
+    background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #e1e1e1), color-stop(1, #f6f6f6) );
+    background: -moz-linear-gradient( center top, #e1e1e1 5%, #f6f6f6 100% );
+    background: -o-linear-gradient( top, rgb( 225, 225, 225 ), rgb( 246, 246, 246 ) );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e1e1e1', endColorstr='#f6f6f6');
+    background-color: #f6f6f6;
+
+    border: 1px SOLID #d1c7ac;
+    color: #333333;
 }
 
 #holder
@@ -121,7 +133,7 @@ input[type="text"], input[type="password"]
 	color: #1a3e66;
 	font: normal 11px "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
 	line-height: 1;
-	padding: 1px 5px 2px 5px;
+	padding: 1px 5px;
 	text-align: center;
 	text-shadow: 0 1px 1px #fff;
 	width: 150px;

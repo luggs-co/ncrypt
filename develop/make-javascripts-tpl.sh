@@ -43,24 +43,47 @@ findjs() {
 	printf '<script type="text/javascript" src="'
 	findjs 'jslibs/head'
 	printf '"></script>\n'
-	printf '<script type="text/javascript">\n'
-	printf '\twindow.ezcrypt_crypto_backend_url = "'
+	printf '\t\t<script type="text/javascript">\n'
+	printf '\t\t\twindow.code_theme="<?=( isset( $theme ) ) ? $theme : "default";?>";\n'
+	printf '\t\t\twindow.ncrypt_crypto_backend_url = "'
 	findjs 'jslibs/sjcl'
 	printf '";\n'
-	printf '\thead.load(window.ezcrypt_crypto_backend_url);\n'
+	printf '\t\t\thead.load(window.ncrypt_crypto_backend_url);\n'
 	printf '\n'
-	printf '\thead.load(\n'
+	printf '\t\t\thead.load(\n'
 
+	for s in jquery codemirror; do
+		printf '\t\t\t\t"'
+		findjs "jslibs/${s}"
+		printf '",\n'
+	done
+	printf '\t\t\t\tfunction() {'
+	printf '\n\t\t\t\t\thead.load(\n'
+	
 	first=1
-	for s in jquery jquery.textchange codemirror codemirror-modes main; do
+	for s in codemirror-simple jquery.textchange; do
+		printf '\t\t\t\t\t\t"'
+		findjs "jslibs/${s}"
+		printf '",\n'
+	done
+	printf '\t\t\t\t\t\tfunction() {'
+	printf '\n\t\t\t\t\t\t\thead.load(\n'
+	
+	first=1
+	for s in codemirror-modes main; do
 		if [ 0 -eq "${first}" ]; then printf ',\n'; fi
-		printf '\t\t"'
+		printf '\t\t\t\t\t\t\t\t"'
 		findjs "jslibs/${s}"
 		printf '"'
 		first=0
 	done
-	printf '\n\t);\n'
-	printf '</script>\n'
+	
+	printf '\n\t\t\t\t\t\t\t);'
+	printf '\n\t\t\t\t\t\t}'
+	printf '\n\t\t\t\t\t);'
+	printf '\n\t\t\t\t}'
+	printf '\n\t\t\t);\n'
+	printf '\t\t</script>\n'
 ) > "${tmpdir}/javascripts.tpl"
 
 if ! diff 'www/tpl/default/includes/javascripts.tpl' "${tmpdir}/javascripts.tpl" >/dev/null; then

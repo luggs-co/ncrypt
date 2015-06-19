@@ -1,13 +1,13 @@
 <?php
 
-	define( 'EZCRYPT_MISSING_DATA', -1 );
-	define( 'EZCRYPT_DOES_NOT_EXIST', 1 );
-	define( 'EZCRYPT_HAS_EXPIRED', 2 );
+	define( 'NCRYPT_MISSING_DATA', -1 );
+	define( 'NCRYPT_DOES_NOT_EXIST', 1 );
+	define( 'NCRYPT_HAS_EXPIRED', 2 );
 
-	define( 'EZCRYPT_NO_PASSWORD', 10 );
-	define( 'EZCRYPT_PASSWORD_SUCCESS', 11 );
-	define( 'EZCRYPT_PASSWORD_FAILED', 12 );
-	define( 'EZCRYPT_PASSWORD_REQUIRED', 13 );
+	define( 'NCRYPT_NO_PASSWORD', 10 );
+	define( 'NCRYPT_PASSWORD_SUCCESS', 11 );
+	define( 'NCRYPT_PASSWORD_FAILED', 12 );
+	define( 'NCRYPT_PASSWORD_REQUIRED', 13 );
 
 	/**
 	 * Basic PHP based paste system
@@ -36,7 +36,7 @@
 				return $expired;
 			}
 
-			return EZCRYPT_DOES_NOT_EXIST;
+			return NCRYPT_DOES_NOT_EXIST;
 		}
 
 		function read( $paste_meta )
@@ -44,14 +44,14 @@
 			if (false !== ( $paste = db_read( $paste_meta['id'] ) ))
 			{
 				switch ($paste['crypto']) {
-				case 'PIDCRYPT':
-					$cipher = 'AES-128-CBC';
-					break;
-				case 'CRYPTO_JS':
-					$cipher = 'AES-256-OFB';
-					break;
-				default:
-					$cipher = $paste['crypto'];
+				    case 'PIDCRYPT':
+					    $cipher = 'AES-128-CBC';
+					    break;
+				    case 'CRYPTO_JS':
+					    $cipher = 'AES-256-OFB';
+					    break;
+				    default:
+					    $cipher = $paste['crypto'];
 				}
 
 				if ( -100 == $paste['ttl'] )
@@ -86,14 +86,14 @@
 		function validate_password( $paste, $password )
 		{
 			// if we haven't gotten a paste yet.
-			if( empty( $paste ) ) return EZCRYPT_MISSING_DATA;
+			if( empty( $paste ) ) return NCRYPT_MISSING_DATA;
 
 			if (!empty($paste['password']))
 			{
 				if (empty($password))
 				{
 					// prompt user for password
-					return EZCRYPT_PASSWORD_REQUIRED;
+					return NCRYPT_PASSWORD_REQUIRED;
 				}
 
 				if (strlen($paste['password']) == 40 && '$' != $paste['password'][0])
@@ -110,20 +110,20 @@
 				if (0 == strcmp($password, $paste['password']))
 				{
 					// correct, send user the required data
-					return EZCRYPT_PASSWORD_SUCCESS;
+					return NCRYPT_PASSWORD_SUCCESS;
 				}
 
 				// incorrect, give the json response an error
-				return EZCRYPT_PASSWORD_FAILED;
+				return NCRYPT_PASSWORD_FAILED;
 			}
 
-			return EZCRYPT_NO_PASSWORD;
+			return NCRYPT_NO_PASSWORD;
 		}
 
 		function has_expired( $paste )
 		{
 			// if we haven't gotten a paste yet.
-			if( empty( $paste ) ) return EZCRYPT_MISSING_DATA;
+			if( empty( $paste ) ) return NCRYPT_MISSING_DATA;
 
 			// determine if the paste has expired.
 			// if ttl is set to -1 that means it a perm paste
@@ -138,7 +138,7 @@
 			{
 				// this paste is flagged as expired, time to clean up
 				db_delete( $paste['id'] );
-				return EZCRYPT_HAS_EXPIRED;
+				return NCRYPT_HAS_EXPIRED;
 			}
 
 			return false;

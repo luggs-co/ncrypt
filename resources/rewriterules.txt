@@ -12,9 +12,9 @@ url.rewrite-once = (
 
 ~~~~ Lighttpd 2.0 ~~~~
 
-docroot "/docroot/"; # alias "/paste" => "/srv/ezcrypt/";
+docroot "/docroot/"; # alias "/paste" => "/srv/ncrypt/";
 if !physical.is_file {
-	docroot "/docroot/index.php"; # alias "/paste" => "/srv/ezcrypt/index.php";
+	docroot "/docroot/index.php"; # alias "/paste" => "/srv/ncrypt/index.php";
 	pathinfo;
 } else {
 	expire "access 2 weeks";

@@ -1,13 +1,23 @@
 <script type="text/javascript" src="jslibs/head-1.0.2-1.min.js"></script>
-<script type="text/javascript">
-	window.ezcrypt_crypto_backend_url = "jslibs/sjcl-e6a466c07c2f131cb1901614082b60706a5e7a5b.min.js";
-	head.load(window.ezcrypt_crypto_backend_url);
+		<script type="text/javascript">
+			window.code_theme="<?=( isset( $theme ) ) ? $theme : "default";?>";
+			window.ncrypt_crypto_backend_url = "jslibs/sjcl-ab45fecda325acba06cc7f4c6de2ff3d0d8d2287.min.js";
+			head.load(window.ncrypt_crypto_backend_url);
 
-	head.load(
-		"jslibs/jquery-1.10.2.min.js",
-		"jslibs/jquery.textchange.min.js",
-		"jslibs/codemirror-43b3b93c3d06af82276a9f717e75976d1db20809.min.js",
-		"jslibs/codemirror-modes-5134c846e5698f25b346bf4a3ebe88c0e31b851e.min.js",
-		"jslibs/main-833c996f56d0021dc39b9db9bdda591e1dd5a667.min.js"
-	);
-</script>
+			head.load(
+				"jslibs/jquery-2.1.4.min.js",
+				"jslibs/codemirror-adca027857ecdf52dbebdc1e27f83d260330912f.min.js",
+				function() {
+					head.load(
+						"jslibs/codemirror-simple-ad83875cf0e021ff74902704917cc426d56bab17.min.js",
+						"jslibs/jquery.textchange.min.js",
+						function() {
+							head.load(
+								"jslibs/codemirror-modes-f8282a8220457d6fc2e666bfd2b93aee2e2402f8.min.js",
+								"jslibs/main-3515dcf5d085477ed3b6827182951e35ac2eff40.min.js"
+							);
+						}
+					);
+				}
+			);
+		</script>

@@ -4,7 +4,7 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 --
--- Database: `ezcrypt`
+-- Database: `ncrypt`
 --
 
 -- --------------------------------------------------------
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `pastes` (
   `password` varchar(100) DEFAULT NULL,
   `data` longblob NOT NULL,
   `syntax` varchar(64) NOT NULL DEFAULT 'text/plain',
-  `crypto` varchar(20) NOT NULL DEFAULT 'CRYPTO_JS',
+  `crypto` varchar(20) NOT NULL DEFAULT 'AES-256-OFB',
   `added` int(15) DEFAULT NULL,
   `ttl` int(10) DEFAULT NULL,
   PRIMARY KEY (`id`)

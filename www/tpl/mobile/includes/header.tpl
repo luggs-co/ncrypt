@@ -3,8 +3,8 @@
 	<head>
 		<title><?=$meta_title?></title>
 		<base href="<?=$site_url?>" />
-		<meta name="description" content="EZCrypt - The original safer way to encrypt your pastes online!" />
-		<meta name="keywords" content="ezcrypt, encryption, pastebin, paste, secure, aes" />
+		<meta name="description" content="<?=$site_name;?> - The original safer way to encrypt your pastes online!" />
+		<meta name="keywords" content="ncrypt, ezcrypt, encryption, pastebin, paste, secure, aes, crypto" />
 		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 		<?if( !isset($norobots) || $norobots !== false ) {?><meta name="robots" content="noarchive" />
 		<meta name="googlebot" content="nosnippet" />
@@ -20,8 +20,8 @@
 	<body>
 		<div id="holder">
 			<div id="header" class="gradient">
-				EZCrypt <span class="small">v0.4</span>
-				<div style="position: absolute; right: 0px; top: 6px;"><a href="http://flattr.com/thing/647627/EZCrypt" target="_blank"><img src="<?=$site_url?>css/flattr-badge-large.png" alt="Flattr this" title="Flattr this" border="0" width="93" height="20" /></a></div>
+				<?=$site_name;?> <span class="small">v0.736</span>
+				<div style="position: absolute; right: 0px; top: 10px;"><a href="bitcoin:<?=$bitcoin_address;?>"><img src="img/bitcoin-button.png" alt="Donate to NCrypt" title="Donate to NCrypt" border="0" width="89" height="20" /></a></div>
 			</div>
 			<nav>
 				<a href="<?=$site_url?>">Home</a>
