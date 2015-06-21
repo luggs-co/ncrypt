@@ -31,7 +31,7 @@
 	$year = gmdate('Y');
 	
 	$__config['site']['footer'] = <<<EOD
-		$year NCry.pt
+		$year ncry.pt
 		<span class="small">&nbsp;&diams;&nbsp;</span>
 		<a href="mailto:contact@ncry.pt">Contact</a>
 EOD;
