@@ -7,6 +7,7 @@
  * - renamed ezcrypt to ncrypt
  * - added code color themes
  * - added use of cookies to remember user preferences (theme,fullscreen,linenumbers,linewrap)
+ * - upload file now shows preview, use submit to upload to server
  *  
  * @version: 0.4
  * @author: NovaKing (novaking@eztv.se)
