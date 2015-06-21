@@ -5,7 +5,7 @@ Home of ncrypt.
 This readme will get updated when a more polished version of the code is completed.
 
 
-TODO: https://gist.github.com/bdc17313ffb423ff22f3 (Comments welcome)
+TODO: https://gist.github.com/luggs-co/1a0dc5f161f18e5861e3 (Comments welcome)
 
 ## Dependencies
 
@@ -32,6 +32,8 @@ Configure database access and other customizations in www/inc/config-local.inc.p
       $__config['database']['username'] = 'ncrypt';
       $__config['database']['password'] = '...';
       $__config['database']['type'] = 'mysql'; // default if unset. for PostgreSQL use 'pgsql'
+      
+Make sure you run "make" as it will generated all the required css/javascript files (and update templates accordingly) used on the website.
 
 ## Directory structure
 
