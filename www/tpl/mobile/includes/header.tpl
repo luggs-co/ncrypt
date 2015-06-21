@@ -25,7 +25,7 @@
 			</div>
 			<nav>
 				<a href="<?=$site_url?>">Home</a>
-				<a href="about">About</a>
+				<a href="<?=$site_url?>about">About</a>
 				<a href="<?=$site_contact?>">Contact</a>
 			</nav>
 			<div id="main">

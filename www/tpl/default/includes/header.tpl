@@ -39,11 +39,11 @@
 			<div id="menu">
 				<a href="<?=$site_url?>">Home</a>
 				<span class="small">&nbsp;</span>
-				<a href="about">About</a>
+				<a href="<?=$site_url?>about">About</a>
 				<span class="small">&nbsp;</span>
 				<a href="<?=$site_contact?>">Contact</a>
 				<span class="small">&nbsp;</span>
-				<a href="ncrypt">Ruby CLI script</a>
+				<a href="<?=$site_url?>ncrypt">Ruby CLI script</a>
 				<span class="small">&nbsp;</span>
 				<a href="<?=$site_source?>" target="_blank">Sourcecode</a>
 				<span class="small">&nbsp;</span>

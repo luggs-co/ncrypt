@@ -23,9 +23,9 @@
 	</select>
 	&nbsp;|&nbsp;
 	<label for="new_usepassword"><acronym title="This password is not used to encrypt the paste">Assign password</acronym></label>&nbsp;<input id="new_usepassword" type="checkbox" name="new_usepassword" />
-	<input type="text" id="new_typepassword" name="new_typepassword" style="display: none;" />
+	<input type="password" id="new_typepassword" name="new_typepassword" style="display: none;" />
 
 	<input type="hidden" id="new_key" name="new_key" />
 	<input type="hidden" id="new_cipher" name="new_cipher" value="AES-256-OFB" />
-	<input type="submit" id="en" name="en" value="Generating key... (waiting for entropy)" style="float: right;" disabled />
+	<input type="submit" id="en" name="en" value="Generating key..." style="float: right;" disabled />
 </div>
