@@ -107,7 +107,7 @@ $( function() {
 	}
 
 	// determine duration taken to render the syntax highlighter
-	function onCodeChange( /* ed, obj */ )
+	function onCodeChange()
 	{
 		if( null != timer_decrypted )
         {
@@ -316,8 +316,21 @@ $( function() {
 
 				if( blob )
                 {
+					console.log( paste.syntax );
 					$( '#saveas' ).show().bind( 'click', function() {
-						saveAs( blob );
+						switch( paste.syntax )
+						{
+							case 'image/png':                   ext='.png';  break;
+							case 'image/jpeg':                  ext='.jpg';  break;
+							case 'image/bmp':                   ext='.bmp';  break;
+							case 'image/tiff':                  ext='.tiff'; break;
+							case 'application/zip':             ext='.zip';  break;
+							case 'application/gzip':            ext='.gz';   break;
+							case 'application/x-7z-compressed': ext='.7z';   break;
+							case 'text/plain':
+							default:                            ext='.txt';  break;
+						}
+						saveAs( blob, window.location.pathname.replace('/p/','') + ext );
 					} );
 				}
 				else
@@ -461,6 +474,7 @@ $( function() {
 	/* reset timer for delayed update */
 	function encrypt_update_delayed()
 	{
+		$( '#new_text' ).css( 'background-image', 'none' );
 		if( delayedEncryptionInProgress != null ) { clearTimeout( delayedEncryptionInProgress ); delayedEncryptionInProgress = null; }
 		delayedEncryptionInProgress = setTimeout( function() {
 			delayedEncryptionInProgress = null;
@@ -468,6 +482,47 @@ $( function() {
 		}, 500 );
 	}
 
+	function displayFile()
+	{
+		var key = $( '#new_key' ).val();
+		var cipher = $( '#new_cipher' ).val();
+		var file = $( '#upload_file' )[0].files[0];
+		var syntax = file.type || 'application/octet-stream';
+
+		var reader = new FileReader();
+		reader.onload = function() {
+			var bytes = new Uint8Array( reader.result );
+			
+			try
+            {
+				if( file && syntax.match( /^image\// ) )
+                {
+					var blob = new FileReader();
+					blob.onload = function( e ) {
+						$( '#new_text' ).html( '' ).val( '' ).text( '' ).css( {
+							'background-image': 'url(' + e.target.result + ')',
+							'background-size': 'auto',
+							'background-repeat': 'no-repeat'
+						} );
+					};
+					blob.readAsDataURL( file );
+				}
+			}
+            catch( e )
+            {
+				console.log( "special binary handling failed:" );
+				console.log( e );
+			}
+				
+			window.ncrypt.async_encrypt( [key, bytes, cipher, { binary: true }], function ( data /*, error, progress */ ) {
+				if( !data ) return;
+				$( '#new_result' ).val( data );
+			} );
+		};
+        
+		reader.readAsArrayBuffer( file );
+	}
+	
 	function submitFile()
 	{
 		var key = $( '#new_key' ).val();
@@ -482,49 +537,43 @@ $( function() {
 			// if password is used, let's sha the password before we send it over
 			password = window.ncrypt_backend.sha( $( '#new_typepassword' ).val() );
 		}
-
-		var reader = new FileReader();
-		reader.onload = function() {
-			var bytes = new Uint8Array( reader.result );
-			window.ncrypt.async_encrypt( [key, bytes, cipher, { binary: true }], function ( data /*, error, progress */ ) {
-				if( !data ) return;
-
-				// send submission to server
-				$.ajax( {
-					url: document.baseURI,
-					type: 'POST',
-					dataType: 'json',
-					data: 'data=' + encodeURIComponent( data ) + '&p=' + password + '&ttl=' + encodeURIComponent( ttl ) + '&syn=' + encodeURIComponent( syntax ) + '&cipher=' + encodeURIComponent( cipher ),
-					cache: false,
-					success: function( json ) {
-						if( ttl == -100 )
-						{
-							// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
-							// instead we simply mock the page and provide the url of the paste
-							
-						}
-						else
-						{
-							var querypw = '';
-							if( password != '' ) querypw = '?p=' + password;
-							window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
-						}
-					},
-					error: function() {
-						enableHover();
-						alert( 'error submitting form' );
-					}
-				} );
-			} );
-		};
-        
-		reader.readAsArrayBuffer( file );
+		
+		// send submission to server
+		$.ajax( {
+			url: document.baseURI,
+			type: 'POST',
+			dataType: 'json',
+			data: 'data=' + encodeURIComponent( $( '#new_result' ).val() ) + '&p=' + password + '&ttl=' + encodeURIComponent( ttl ) + '&syn=' + encodeURIComponent( syntax ) + '&cipher=' + encodeURIComponent( cipher ),
+			cache: false,
+			success: function( json ) {
+				if( ttl == -100 )
+				{
+					// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
+					// instead we simply mock the page and provide the url of the paste
+					
+				}
+				else
+				{
+					var querypw = '';
+					if( password != '' ) querypw = '?p=' + password;
+					window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
+				}
+			},
+			error: function() {
+				enableHover();
+				alert( 'error submitting form' );
+			}
+		} );
 	}
 
 	function submitData()
 	{
 		if( $( '#new_text' ).val() == '' )
 		{
+			if( $( '#new_text' ).css( 'background-image' ) != '' )
+			{
+				submitFile();
+			}
 			return false; // don't submit if blank form
 		}
 
@@ -587,9 +636,10 @@ $( function() {
 			lineNumbers: true,
 			matchBrackets: false,
 			lineWrapping: true,
-			readOnly: true,
-			onChange: onCodeChange
+			readOnly: true
 		} );
+		
+		editor.on( 'change', onCodeChange );
 		
 		window.editor = editor;
 	}
@@ -607,7 +657,7 @@ $( function() {
 			$( '#new_key' ).val( key );
 			var en = $( '#en' );
 			en.bind( 'click', submitData );
-			$( '#upload_file' ).bind( 'change', submitFile );
+			$( '#upload_file' ).bind( 'change', displayFile );
 			en.removeAttr( 'disabled' );
 			en.val( 'Submit' );
 			if( 'undefined' !== typeof FileReader ) $( '#upload' ).show();
