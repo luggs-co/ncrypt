@@ -375,7 +375,7 @@ $( function() {
 			cache: false,
 			beforeSend: function() {
 				$( '#decrypting' ).css( 'background-image', 'url(../img/downloading.gif)' );
-			}
+			},
 			success: function( json ) {
 				// success, assign the data accordingly
 				paste.data = json.data;
