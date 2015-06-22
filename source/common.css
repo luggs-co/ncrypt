@@ -294,8 +294,8 @@ input.tool-button:checked + label
 	left: 40px;
 	margin-top: 5px;
 	z-index: 100;
-	height: 15px;
-	background: url(../img/decrypting.gif) top left no-repeat;
+	height: 25px;
+	background: url(../img/loading.gif) top left no-repeat;
 }
 
 textarea
