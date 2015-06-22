@@ -298,6 +298,12 @@ input.tool-button:checked + label
 	background: url(../img/loading.gif) top left no-repeat;
 }
 
+#decrypting #download-progress
+{
+	display: none;
+	margin-top: 25;
+}
+
 textarea
 {
 	width: 100%;

@@ -34,8 +34,7 @@
 					<?php $this->incl('includes/theme-select.tpl'); ?>
 				</div>
 				<div id="wrap" style="clear: both;"></div>
-
-				<div id="decrypting"></div>
+				<div id="decrypting"><progress id="download-progress" max="100" value="0"></progress></div>
 				<div id="alternate_content"></div>
 				<div id="content_container">
 					<input type="hidden" id="content" />

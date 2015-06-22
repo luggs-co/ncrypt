@@ -50,12 +50,12 @@ $( function() {
 				if( window.sjcl && window.sjcl.random )
 				{
 					rnd = window.sjcl.random.randomWords( 16, 0 );
-					worker.postMessage( { id: 0, func: '_add_entropy', arguments: [rnd,32,'sjcl.random'] } );
+					worker.postMessage( { id: 0, func: '_add_entropy', arguments: [rnd, 32, 'sjcl.random'] } );
 				}
 				else
 				{
-					rnd = ( Math.random() * 4294967296) ^ 0;
-					worker.postMessage( { id: 0, func: '_add_entropy', arguments: [rnd,1,'Math.random'] } );
+					rnd = ( Math.random() * 4294967296 ) ^ 0;
+					worker.postMessage( { id: 0, func: '_add_entropy', arguments: [rnd, 1, 'Math.random'] } );
 				}
 			}
 			var id = ++worker_next_id;
@@ -253,7 +253,7 @@ $( function() {
 					// paste is a generic text
 					try
 					{
-						var blob = new Blob( [output], { type: syntax } );
+						blob = new Blob( [output], { type: syntax } );
 					}
 					catch( e )
 					{
@@ -275,11 +275,11 @@ $( function() {
 					// paste is in data format, determine if it is an image and render out
 					try
 					{
-						var blob = new Blob([new Uint8Array(output)], { type: syntax });
+						blob = new Blob([new Uint8Array(output)], { type: syntax });
 					}
 					catch( e )
 					{
-						console.log( "saveAs not working:" );
+						console.log( 'saveAs not working:' );
 						console.log( e );
 					}
 
@@ -299,7 +299,7 @@ $( function() {
 					}
 					catch( e )
 					{
-						console.log( "special binary handling failed:" );
+						console.log( 'special binary handling failed:' );
 						console.log( e );
 					}
 
@@ -307,14 +307,15 @@ $( function() {
 					editor.setValue( display_binary_hex( output, syntax ) );
 
 					$( '#clone' ).hide();
-					$( '#showhex' ).toggle(hide_hex);
-					$( '#content_container').toggle(!hide_hex);
+					$( '#showhex' ).toggle( hide_hex );
+					$( '#content_container').toggle( !hide_hex );
 				}
 
 				var p = paste.highlight_options || { };
 				for( var k in p )
 				{
-					if ( p.hasOwnProperty( k ) ) {
+					if ( p.hasOwnProperty( k ) )
+					{
 						editor.setOption( k, p[k] );
 					}
 				}
@@ -326,17 +327,17 @@ $( function() {
 						// basic test to determine file extension
 						switch( paste.syntax )
 						{
-							case 'image/png':				   ext='.png';  break;
-							case 'image/jpeg':				  ext='.jpg';  break;
-							case 'image/bmp':				   ext='.bmp';  break;
-							case 'image/tiff':				  ext='.tiff'; break;
-							case 'application/zip':			 ext='.zip';  break;
-							case 'application/gzip':			ext='.gz';   break;
-							case 'application/x-7z-compressed': ext='.7z';   break;
+							case 'image/png':					ext = '.png';  break;
+							case 'image/jpeg':					ext = '.jpg';  break;
+							case 'image/bmp':					ext = '.bmp';  break;
+							case 'image/tiff':					ext = '.tiff'; break;
+							case 'application/zip':				ext = '.zip';  break;
+							case 'application/gzip':			ext = '.gz';   break;
+							case 'application/x-7z-compressed':	ext = '.7z';   break;
 							case 'text/plain':
-							default:							ext='.txt';  break;
+							default:							ext = '.txt';  break;
 						}
-						saveAs( blob, window.location.pathname.replace('/p/','') + ext );
+						saveAs( blob, window.location.pathname.replace( '/p/', '' ) + ext );
 					} );
 				}
 				else
@@ -375,12 +376,13 @@ $( function() {
 			cache: false,
 			beforeSend: function() {
 				$( '#decrypting' ).css( 'background-image', 'url(../img/downloading.gif)' );
+				$( '#download-progress' ).show();
 			},
 			xhrFields: {
 				onprogress: function (e) {
 					if( e.lengthComputable )
 					{
-						console.log( e.loaded / e.total * 100 + '%' );
+						$( '#download-progress' ).val( ( e.loaded / e.total * 100 ) );
 					}
 				}
 			},
@@ -391,6 +393,7 @@ $( function() {
 				paste.cipher = json.cipher;
 				
 				$( '#decrypting' ).css( 'background-image', 'url(../img/decrypting.gif)' );
+				$( '#download-progress' ).hide();
 
 				decrypt_update();
 			},
