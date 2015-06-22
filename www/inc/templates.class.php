@@ -80,12 +80,14 @@
 					break;
 				case 'json':
 					header( 'Content-Type: application/json' );
+					header( 'Content-Length: ' . mb_strlen( $object['data'] ) );
 					echo json_encode( $object );
 					break;
 				case 'raw':
 					header( 'Content-Type: application/octet-stream' );
 					if (!empty( $object['syntax'] )) header( 'X-Syntax: ' . strip_unsafe_header( $object['syntax'] ) );
 					if (!empty( $object['cipher'] )) header( 'X-Cipher: ' . strip_unsafe_header( $object['cipher'] ) );
+					header( 'Content-Length: ' . mb_strlen( $object['data'] ) );
 					echo $object['data'];
 					break;
 			}
