@@ -79,9 +79,10 @@
 					$this->incl( $template_name );
 					break;
 				case 'json':
-					$json = json_encode( $object );
+					$json = gzencode( json_encode( $object ) );
 					header( 'Content-Type: application/json' );
 					header( 'Content-Length: ' . mb_strlen( $json ) );
+					header( 'Content-Encoding: gzip' );
 					echo $json;
 					break;
 				case 'raw':
