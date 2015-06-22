@@ -23,15 +23,16 @@
 		<?php $this->incl('includes/javascripts.tpl'); ?>
 	</head>
 	<body>
-		<!--
-		<div id="overlay"><div id="popup">
-			<div class="success">Paste created successfully!</div>
-			<div style="height: 10px;"></div>
-			<input type="text" readonly="readonly" value="" class="url" onclick="$( this ).select();" onfocus="$( this ).select();" />
-			<div style="height: 5px;"></div>
-			Please note that the above URL can only be used once, as it will be deleted after being displayed.
-		</div></div>
-		-->
+		<div id="overlay">
+			<div id="popup">
+				<a href="#" class="close"></a>
+				<div class="success">Paste created successfully!</div>
+				<div style="height: 10px;"></div>
+				<input type="text" readonly="readonly" value="" id="burn-url" class="url" onclick="$( this ).select();" onfocus="$( this ).select();" />
+				<div style="height: 5px;"></div>
+				Please note that the above URL can only be used once, as it will be deleted after being displayed.
+			</div>
+		</div>
 		<div id="holder">
 			<div id="header" class="gradient">
 				<a href="/"><?=$site_name;?></a> <span class="small">v0.736</span> - Giving you the power to encrypt your information
