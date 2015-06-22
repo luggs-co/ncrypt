@@ -7,5 +7,7 @@
 /www/jslibs/main-*
 /www/jslibs/sjcl-*
 /www/css/*.css
+/www/tpl/mobile/includes/css.tpl
+/www/tpl/mobile/includes/javascripts.tpl
 /www/tpl/default/includes/css.tpl
 /www/tpl/default/includes/javascripts.tpl
