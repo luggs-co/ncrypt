@@ -376,6 +376,25 @@ $( function() {
 			beforeSend: function() {
 				$( '#decrypting' ).css( 'background-image', 'url(../img/downloading.gif)' );
 			},
+			xhr: function() {
+				var xhr = new window.XMLHttpRequest();
+				xhr.addEventListener( "progress", function( ev ) {
+					console.log( ev );
+					if( ev.lengthComputable )
+					{
+						console.log( ev );
+					}
+				}, false );
+    			return xhr;
+			},
+			xhrFields: {
+				onprogress: function (e) {
+					console.log('-');
+					if (e.lengthComputable) {
+						console.log(e.loaded / e.total * 100 + '%');
+					}
+				}
+			},
 			success: function( json ) {
 				// success, assign the data accordingly
 				paste.data = json.data;
