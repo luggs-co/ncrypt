@@ -183,9 +183,10 @@ textarea
 }
 
 
-/* #overlay/#popup unused so far */
+/* #overlay/#popup */
 #overlay
 {
+	display: none;
 	position: fixed;
 	left: 0px;
 	top: 0px;
@@ -210,7 +211,7 @@ textarea
 	position: absolute;
 	top: 50%;
 	left: 50%;
-	width: 500px;
+	width: 550px;
 	height: 120px;
 	visibility: visible;
 	z-index: 999;
@@ -235,8 +236,23 @@ textarea
 
 #popup .url
 {
-	width: 488px;
+	width: 538px;
 	padding: 5px;
 	font-size: 16px;
 }
 
+#popup .close
+{
+	color: #777;
+	font: 14px/100% arial, sans-serif;
+	position: absolute;
+	right: 5px;
+	text-decoration: none;
+	text-shadow: 0 1px 0 #fff;
+	top: 5px;
+}
+
+#popup .close:after
+{
+  content: '✖'; /* UTF-8 symbol */
+}
