@@ -558,16 +558,17 @@ $( function() {
 			data: 'data=' + encodeURIComponent( $( '#new_result' ).val() ) + '&p=' + password + '&ttl=' + encodeURIComponent( ttl ) + '&syn=' + encodeURIComponent( syntax ) + '&cipher=' + encodeURIComponent( cipher ),
 			cache: false,
 			success: function( json ) {
+				var querypw = '';
+				if( password != '' ) querypw = '?p=' + password;
 				if( ttl == -100 )
 				{
 					// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
 					// instead we simply mock the page and provide the url of the paste
-					
+					$( '#burn-url' ).val( location.protocol + '//' + window.location.hostname + '/p/' + json.id + querypw + '#' + key );
+					$( '#overlay' ).show();
 				}
 				else
 				{
-					var querypw = '';
-					if( password != '' ) querypw = '?p=' + password;
 					window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
 				}
 			},
