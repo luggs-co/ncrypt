@@ -25,11 +25,11 @@ $( function() {
 	var paste = { data: '', cipher: '', syntax: '', key: false, highlight_options: { } };
 
 	if( typeof Worker !== 'undefined' && typeof window.ncrypt_worker === 'undefined' )
-    {
+	{
 		worker = new Worker( window.ncrypt_crypto_backend_url );
 		worker_pending = {};
 		worker_next_id = 0;
-        
+		
 		worker.onmessage = function( event ) {
 			var data = event.data;
 			if( !data.id ) return;
@@ -38,22 +38,22 @@ $( function() {
 			if( !data.hasOwnProperty( 'progress' ) ) delete worker_pending[data.id];
 			obj( data.result, data.error, data.progress );
 		}
-        
+		
 		window.ncrypt_backend.randomKey( function( key ) {
 			worker.postMessage( { id: 0, func: '_add_entropy', arguments: [key, 128, 'ncrypt backend random'] } );
 		} );
 		
 		worker_send = function( func, args, cb ) {
 			if( !worker_has_entropy )
-            {
+			{
 				var rnd;
 				if( window.sjcl && window.sjcl.random )
-                {
+				{
 					rnd = window.sjcl.random.randomWords( 16, 0 );
 					worker.postMessage( { id: 0, func: '_add_entropy', arguments: [rnd,32,'sjcl.random'] } );
 				}
-                else
-                {
+				else
+				{
 					rnd = ( Math.random() * 4294967296) ^ 0;
 					worker.postMessage( { id: 0, func: '_add_entropy', arguments: [rnd,1,'Math.random'] } );
 				}
@@ -63,15 +63,15 @@ $( function() {
 			worker.postMessage( { id: id, func: func, arguments: args } );
 		}
 	}
-    else
-    {
+	else
+	{
 		worker_send = function( func, args, cb ) {
 			try
-            {
+			{
 				cb( { result: window.ncrypt[func].apply( this, args ) } );
 			}
-            catch( e )
-            {
+			catch( e )
+			{
 				cb( { error: e } );
 			}
 		}
@@ -83,7 +83,7 @@ $( function() {
 	var timer_decrypted = null; // created after decryption to measure editor coloring
 
 	function TimeDiff()
-    {
+	{
 		var start = new Date();
 		return {
 			getDiff: function() {
@@ -112,7 +112,7 @@ $( function() {
 	function onCodeChange()
 	{
 		if( null != timer_decrypted )
-        {
+		{
 			var coloring = timer_decrypted.getDiff();
 			// display duration
 			$( '#coloring' ).html( 'syntax: ' + coloring + 'ms,');
@@ -129,41 +129,41 @@ $( function() {
 		var offprefix = bytes.length.toString( 16 ).replace( /./g, '0' )
 		var BYTES_PER_LINE = 20;
 		var lines = [], bline, offset = 0, line, i, j;
-        
+		
 		lines.push( 'Binary file of type: ' + syntax + "\n" );
 		lines.push( "\n" );
-        
+		
 		while( offset < bytes.length )
-        {
+		{
 			if( limit >= 0 && offset >= limit )
-            {
+			{
 				lines.push( "\n" );
 				lines.push( "too much data, stopping now\n" );
 				break;
 			}
-            
+			
 			bline = bytes.slice( offset, offset + BYTES_PER_LINE );
 			line = ( offprefix + offset.toString( 16 ) ).slice( -offprefix.length ) + ':';
 			offset += bline.length;
-            
+			
 			for( i = 0; i < BYTES_PER_LINE; )
-            {
+			{
 				line += ' ';
 				for( j = 0; j < 4; ++j, ++i )
-                {
+				{
 					if( i < bline.length )
-                    {
+					{
 						line += ( '00' + bline[i].toString( 16 ) ).slice( -2 ) + ' ';
 					}
-                    else
-                    {
+					else
+					{
 						line += '   ';
 					}
 				}
 			}
-            
+			
 			line += '| ';
-            
+			
 			// replace non printable characters (in unicode <= 0xff) with '.'; each byte is treated as a separate unicode codepoint
 			line += String.fromCharCode.apply( String, bline ).replace( /[\0-\x1F\x7F-\x9F\xAD]/g, '.' )
 			line += "\n";
@@ -190,7 +190,7 @@ $( function() {
 		s.val( syntax );
 		if( s.val() === syntax ) return;
 		if ( $( '#new_syntax .header.unknown' ).length == 0 )
-        {
+		{
 			s.append( $( '<option disabled="disabled" class="header unknown">- Unknown format -</option>' ) );
 		}
 		var o = $( '<option>' );
@@ -207,36 +207,36 @@ $( function() {
 		var key = paste.key || window.location.hash.substring( 1 );
 		var data = paste.data;
 		var cipher = paste.cipher;
-        
+		
 		if( '' == data )
-        {
+		{
 			$( '#askpassword' ).show();
 			$( '#typepassword' ).focus();
 			return false;
 		}
 		else
-        {
+		{
 			$( '#askpassword' ).hide();
 		}
-        
+		
 		if( '' == key )
-        {
+		{
 			$( '#insertkey' ).show();
 			$( '#typekey' ).focus();
 			return false;
 		}
 		else
-        {
+		{
 			$( '#insertkey' ).hide();
 		}
 
 		$( '#decrypting' ).show();
-        
+		
 		// start timer and decrypt
 		var t = new TimeDiff();
 		window.ncrypt.async_decrypt( [key, data, cipher], function( output, error ) {
 			if( output )
-            {
+			{
 				// display duration
 				time_decryption = t.getDiff();
 				$( '#execute' ).html( 'decryption: ' + time_decryption + 'ms,');
@@ -249,14 +249,14 @@ $( function() {
 
 				timer_decrypted = new TimeDiff();
 				if( 'string' === typeof output || output instanceof String )
-                {
-                	// paste is a generic text
+				{
+					// paste is a generic text
 					try
-                    {
+					{
 						var blob = new Blob( [output], { type: syntax } );
 					}
-                    catch( e )
-                    {
+					catch( e )
+					{
 						console.log( "saveAs not working:" );
 						console.log( e );
 					}
@@ -271,14 +271,14 @@ $( function() {
 					if ( $( '#clone' ).length ) set_new_syntax( paste.syntax );
 				}
 				else
-                {
-                	// paste is in data format, determine if it is an image and render out
+				{
+					// paste is in data format, determine if it is an image and render out
 					try
-                    {
+					{
 						var blob = new Blob([new Uint8Array(output)], { type: syntax });
 					}
-                    catch( e )
-                    {
+					catch( e )
+					{
 						console.log( "saveAs not working:" );
 						console.log( e );
 					}
@@ -286,9 +286,9 @@ $( function() {
 					var syntax = paste.syntax;
 					var hide_hex = false;
 					try
-                    {
+					{
 						if( blob && syntax.match( /^image\// ) )
-                        {
+						{
 							var img = $( '<img>' );
 							$( '#alternate_content' ).append( img );
 							hide_hex = true;
@@ -297,8 +297,8 @@ $( function() {
 							blob_r.readAsDataURL( blob );
 						}
 					}
-                    catch( e )
-                    {
+					catch( e )
+					{
 						console.log( "special binary handling failed:" );
 						console.log( e );
 					}
@@ -313,39 +313,39 @@ $( function() {
 
 				var p = paste.highlight_options || { };
 				for( var k in p )
-                {
+				{
 					if ( p.hasOwnProperty( k ) ) {
 						editor.setOption( k, p[k] );
 					}
 				}
 
 				if( blob )
-                {
+				{
 					console.log( paste.syntax );
 					$( '#saveas' ).show().on( 'click', function() {
 						// basic test to determine file extension
 						switch( paste.syntax )
 						{
-							case 'image/png':                   ext='.png';  break;
-							case 'image/jpeg':                  ext='.jpg';  break;
-							case 'image/bmp':                   ext='.bmp';  break;
-							case 'image/tiff':                  ext='.tiff'; break;
-							case 'application/zip':             ext='.zip';  break;
-							case 'application/gzip':            ext='.gz';   break;
+							case 'image/png':				   ext='.png';  break;
+							case 'image/jpeg':				  ext='.jpg';  break;
+							case 'image/bmp':				   ext='.bmp';  break;
+							case 'image/tiff':				  ext='.tiff'; break;
+							case 'application/zip':			 ext='.zip';  break;
+							case 'application/gzip':			ext='.gz';   break;
 							case 'application/x-7z-compressed': ext='.7z';   break;
 							case 'text/plain':
-							default:                            ext='.txt';  break;
+							default:							ext='.txt';  break;
 						}
 						saveAs( blob, window.location.pathname.replace('/p/','') + ext );
 					} );
 				}
 				else
-                {
+				{
 					$( '#saveas' ).hide();
 				}
 			}
 			else if( error )
-            {
+			{
 				$( '#decrypting' ).hide();
 				alert( error );
 			}
@@ -362,7 +362,7 @@ $( function() {
 		var hashless_url = url.substr( 0, index_of_hash );
 
 		if( !initialLoad )
-        {
+		{
 			password = 'p=' + window.ncrypt_backend.sha( $( '#typepassword' ).val() );
 		}
 		$( '#decrypting' ).show();
@@ -383,12 +383,12 @@ $( function() {
 			},
 			error: function() {
 				if( initialLoad )
-                {
+				{
 					// show dialogs
 					decrypt_update();
 				}
-                else
-                {
+				else
+				{
 					alert( 'bad password!' );
 				}
 			}
@@ -403,15 +403,15 @@ $( function() {
 	function encrypt_finished( cb )
 	{
 		if( delayedEncryptionInProgress || !_encryptResult )
-        {
+		{
 			encrypt_update( cb );
 		}
 		else if( !encryptionInProgress )
-        {
+		{
 			cb.apply( this, _encryptResult );
 		}
 		else
-        {
+		{
 			if( cb ) _encrypt_finished.push( cb );
 		}
 	}
@@ -422,13 +422,13 @@ $( function() {
 
 		/* remove delayed update timer */
 		if( delayedEncryptionInProgress != null )
-        {
+		{
 			clearTimeout( delayedEncryptionInProgress );
 			delayedEncryptionInProgress = null;
 		}
 
 		if( encryptionInProgress )
-        {
+		{
 			encryptionInProgress = 2;
 			if( cb ) _encrypt_finished.push( cb );
 			return;
@@ -447,22 +447,22 @@ $( function() {
 		window.ncrypt.async_encrypt( [key, text, cipher], function ( result, error, progress )
 		{
 			if( !progress )
-            {
+			{
 				if( 2 == encryptionInProgress )
-                {
+				{
 					/* restart */
 					encryptionInProgress = 0;
 					encrypt_update();
 					return;
 				}
 				else
-                {
+				{
 					encryptionInProgress = 0;
 				}
 			}
 
 			if( result )
-            {
+			{
 				result = stringBreak( result, 96 );
 
 				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
@@ -473,7 +473,7 @@ $( function() {
 			_encryptResult = [result, error, progress];
 			
 			for( i = 0, len = l.length; i < len; ++i )
-            {
+			{
 				l[i].call( this, _encryptResult );
 			}
 		} );
@@ -504,9 +504,9 @@ $( function() {
 			var bytes = new Uint8Array( reader.result );
 			
 			try
-            {
+			{
 				if( file && syntax.match( /^image\// ) )
-                {
+				{
 					var blob = new FileReader();
 					blob.onload = function( e ) {
 						$( '#new_text' ).html( '' ).val( '' ).text( '' ).css( {
@@ -518,8 +518,8 @@ $( function() {
 					blob.readAsDataURL( file );
 				}
 			}
-            catch( e )
-            {
+			catch( e )
+			{
 				console.log( "special binary handling failed:" );
 				console.log( e );
 			}
@@ -529,7 +529,7 @@ $( function() {
 				$( '#new_result' ).val( data );
 			} );
 		};
-        
+		
 		reader.readAsArrayBuffer( file );
 	}
 	
@@ -710,7 +710,7 @@ $( function() {
 	} );
 
 	if( $( '#clone' ).length )
-    {
+	{
 		$( '#content_container' ).hide();
 
 		/* want to show a paste */
@@ -752,13 +752,13 @@ $( function() {
 			editor.setOption( 'lineWrapping', checked );
 			_cookies.setItem( 'linewrap', checked, 31536e3, '/' );
 		} );
-        
+		
 		$( '#tool-numbers' ).on( 'click', function() {
 			var checked = $( '#tool-numbers' ).is( ':checked' );
 			editor.setOption( 'lineNumbers', checked );
 			_cookies.setItem( 'linenumbers', checked, 31536e3, '/' );
 		} );
-        
+		
 		$( '#tool-fullscreen' ).on( 'click', function() {
 			var checked = $( '#tool-fullscreen' ).is( ':checked' );
 			$( '#holder' ).css( 'width', checked ? '100%' : '' );
@@ -787,18 +787,18 @@ $( function() {
 		} );
 		
 		if( window.ncrypt_paste )
-        {
+		{
 			paste = window.ncrypt_paste;
 			decrypt_update();
 		}
 		else
-        {
+		{
 			// fetch paste
 			requestData( true );
 		}
 	}
 	else if( window.ncrypt_paste )
-    {
+	{
 		paste = window.ncrypt_paste;
 		if( typeof( window.ncrypt_paste.theme ) != 'undefined' )
 		{
