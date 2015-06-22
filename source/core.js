@@ -378,6 +378,8 @@ $( function() {
 				paste.data = json.data;
 				paste.syntax = json.syntax;
 				paste.cipher = json.cipher;
+				
+				$( '#decrypting' ).css( 'background-image', 'url(../img/decrypting.gif)' );
 
 				decrypt_update();
 			},
