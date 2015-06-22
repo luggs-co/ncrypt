@@ -331,7 +331,8 @@ $( function() {
 							case 'image/jpeg':					ext = '.jpg';  break;
 							case 'image/bmp':					ext = '.bmp';  break;
 							case 'image/tiff':					ext = '.tiff'; break;
-							case 'application/zip':				ext = '.zip';  break;
+							case 'application/zip':
+							case 'application/x-zip':			ext = '.zip';  break;
 							case 'application/gzip':			ext = '.gz';   break;
 							case 'application/x-7z-compressed':	ext = '.7z';   break;
 							case 'text/plain':
