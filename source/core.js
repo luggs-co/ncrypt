@@ -30,7 +30,7 @@ $( function() {
 		worker_pending = {};
 		worker_next_id = 0;
         
-		worker.onmessage = function ( event ) {
+		worker.onmessage = function( event ) {
 			var data = event.data;
 			if( !data.id ) return;
 			var obj = worker_pending[data.id];
@@ -41,7 +41,8 @@ $( function() {
         
 		window.ncrypt_backend.randomKey( function( key ) {
 			worker.postMessage( { id: 0, func: '_add_entropy', arguments: [key, 128, 'ncrypt backend random'] } );
-		});
+		} );
+		
 		worker_send = function( func, args, cb ) {
 			if( !worker_has_entropy )
             {
@@ -249,6 +250,7 @@ $( function() {
 				timer_decrypted = new TimeDiff();
 				if( 'string' === typeof output || output instanceof String )
                 {
+                	// paste is a generic text
 					try
                     {
 						var blob = new Blob( [output], { type: syntax } );
@@ -264,11 +266,13 @@ $( function() {
 
 					$( '#showhex' ).hide();
 					$( '#clone' ).show();
+					
 					// copy syntax if paste is a real paste, not the index example
 					if ( $( '#clone' ).length ) set_new_syntax( paste.syntax );
 				}
 				else
                 {
+                	// paste is in data format, determine if it is an image and render out
 					try
                     {
 						var blob = new Blob([new Uint8Array(output)], { type: syntax });
@@ -318,7 +322,8 @@ $( function() {
 				if( blob )
                 {
 					console.log( paste.syntax );
-					$( '#saveas' ).show().bind( 'click', function() {
+					$( '#saveas' ).show().on( 'click', function() {
+						// basic test to determine file extension
 						switch( paste.syntax )
 						{
 							case 'image/png':                   ext='.png';  break;
@@ -439,7 +444,8 @@ $( function() {
 
 		// start timer and encrypt
 		var t = new TimeDiff();
-		window.ncrypt.async_encrypt( [key, text, cipher], function ( result, error, progress ) {
+		window.ncrypt.async_encrypt( [key, text, cipher], function ( result, error, progress )
+		{
 			if( !progress )
             {
 				if( 2 == encryptionInProgress )
@@ -465,6 +471,7 @@ $( function() {
 
 			var i, len, l = progress ? _encrypt_finished.slice() : _encrypt_finished.splice( 0 );
 			_encryptResult = [result, error, progress];
+			
 			for( i = 0, len = l.length; i < len; ++i )
             {
 				l[i].call( this, _encryptResult );
@@ -476,7 +483,9 @@ $( function() {
 	function encrypt_update_delayed()
 	{
 		$( '#new_text' ).css( 'background-image', 'none' );
+		
 		if( delayedEncryptionInProgress != null ) { clearTimeout( delayedEncryptionInProgress ); delayedEncryptionInProgress = null; }
+		
 		delayedEncryptionInProgress = setTimeout( function() {
 			delayedEncryptionInProgress = null;
 			encrypt_update();
@@ -601,16 +610,17 @@ $( function() {
 				data: 'data=' + encodeURIComponent( data ) + '&p=' + password + '&ttl=' + encodeURIComponent( ttl ) + '&syn=' + encodeURIComponent( syntax ) + '&cipher=' + encodeURIComponent( cipher ),
 				cache: false,
 				success: function( json ) {
+					var querypw = '';
+					if (password != '') querypw = '?p=' + password;
 					if( ttl == -100 )
 					{
 						// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
 						// instead we simply mock the page and provide the url of the paste
-						
+						$( '#burn-url' ).val( location.protocol + '//' + window.location.hostname + '/p/' + json.id + querypw + '#' + key );
+						$( '#overlay' ).show();
 					}
 					else
 					{
-						var querypw = '';
-						if (password != '') querypw = '?p=' + password;
 						window.location = document.baseURI + 'p/' + json.id + querypw + '#' + key;
 					}
 				},
@@ -646,29 +656,31 @@ $( function() {
 	}
 
 	/* wait until we have a key (may have to wait for some entropy from user inputs) */
-	if ($( '#new_key' ).length) {
+	if( $( '#new_key' ).length )
+	{
 		$( '#upload' ).hide();
-		$( '#upload' ).bind( 'click', function(e) {
+		$( '#upload' ).on( 'click', function( e ) {
 			$( '#upload_file' ).click();
 			e.preventDefault();
 			return false;
-		});
+		} );
 
-		window.ncrypt_backend.randomKey(function (key) {
+		window.ncrypt_backend.randomKey( function( key ) {
 			$( '#new_key' ).val( key );
 			var en = $( '#en' );
-			en.bind( 'click', submitData );
-			$( '#upload_file' ).bind( 'change', displayFile );
+			en.on( 'click', submitData );
 			en.removeAttr( 'disabled' );
 			en.val( 'Submit' );
+			
+			$( '#upload_file' ).on( 'change', displayFile );
 			if( 'undefined' !== typeof FileReader ) $( '#upload' ).show();
 
 			var text = $( '#new_text' );
-			if ('' != text.val() ) encrypt_update_delayed();
-			text.bind( 'textchange', encrypt_update_delayed );
+			if( '' != text.val() ) encrypt_update_delayed();
+			text.on( 'textchange', encrypt_update_delayed );
 
 			// support ctrl+enter to send paste
-			text.bind( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
+			text.on( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
 
 			// hover effect when moving mouse over submit button
 			en.hover(
@@ -683,41 +695,71 @@ $( function() {
 			);
 		} );
 	}
+	
+	$( '#popup .close' ).on( 'click', function() { $( '#overlay' ).hide(); } );
 
-	$( '#new_usepassword' ).change( function() { if( this.checked ) { $( '#new_typepassword' ).show(); } else { $( '#new_typepassword' ).hide(); } } );
+	$( '#new_usepassword' ).change( function() {
+		if( this.checked )
+		{
+			$( '#new_typepassword' ).show();
+		}
+		else
+		{
+			$( '#new_typepassword' ).hide();
+		}
+	} );
 
 	if( $( '#clone' ).length )
     {
 		$( '#content_container' ).hide();
 
 		/* want to show a paste */
-		$( '#submitpassword' ).bind( 'click', function() { requestData(false); } );
-		$( '#submitkey' ).bind( 'click', function() {
+		$( '#submitpassword' ).on( 'click', function() { requestData(false); } );
+		
+		$( '#submitkey' ).on( 'click', function() {
 			paste.key = $( '#typekey' ).val();
 			decrypt_update();
 		} );
-		$( '#typepassword,#typekey' ).bind( 'keydown', function( e ) { if( e.keyCode == 13 ) { $( this ).parent().find( 'input[type=button]' ).click(); } } );
+		
+		$( '#typepassword,#typekey' ).on( 'keydown', function( e ) {
+			if( e.keyCode == 13 )
+			{
+				$( this ).parent().find( 'input[type=button]' ).click();
+			}
+		} );
 
-		$( '#new' ).bind( 'click', function() { $( '#new_text' ).html( '' ); $( '#new_result' ).val( '' ); $( '#newpaste' ).slideDown(); } );
-		$( '#clone' ).bind( 'click', function() {
+		$( '#new' ).on( 'click', function() {
+			$( '#new_text' ).html( '' );
+			$( '#new_result' ).val( '' );
+			$( '#newpaste' ).slideDown();
+		} );
+		
+		$( '#clone' ).on( 'click', function() {
 			set_new_syntax( paste.syntax );
 			$( '#new_text' ).html( editor.getValue() ).trigger( 'textchange' );
 			$( '#newpaste' ).slideDown();
 		} );
 
-		$( '#tool-wrap' ).bind( 'click', function() {
+		/**
+		 * Toolbars
+		 * - line wrapping
+		 * - line numbers
+		 * - fullscreen
+		 * - code theme color
+		 **/
+		$( '#tool-wrap' ).on( 'click', function() {
 			var checked = $( '#tool-wrap' ).is( ':checked' );
 			editor.setOption( 'lineWrapping', checked );
 			_cookies.setItem( 'linewrap', checked, 31536e3, '/' );
 		} );
         
-		$( '#tool-numbers' ).bind( 'click', function() {
+		$( '#tool-numbers' ).on( 'click', function() {
 			var checked = $( '#tool-numbers' ).is( ':checked' );
 			editor.setOption( 'lineNumbers', checked );
 			_cookies.setItem( 'linenumbers', checked, 31536e3, '/' );
 		} );
         
-		$( '#tool-fullscreen' ).bind( 'click', function() {
+		$( '#tool-fullscreen' ).on( 'click', function() {
 			var checked = $( '#tool-fullscreen' ).is( ':checked' );
 			$( '#holder' ).css( 'width', checked ? '100%' : '' );
 			_cookies.setItem( 'fullscreen', checked, 31536e3, '/' );
@@ -727,20 +769,20 @@ $( function() {
 			select_theme( this.value );
 		} );
 		
-		var checked = $( '#tool-wrap' ).is( ':checked' );
-		editor.setOption( 'lineWrapping', checked );
+		// cookies have set the state of the toolbars, here we read them to determine if we modify the interface
+		editor.setOption( 'lineWrapping', $( '#tool-wrap' ).is( ':checked' ) );
 		
-		var checked = $( '#tool-numbers' ).is( ':checked' );
-		editor.setOption( 'lineNumbers', checked );
+		editor.setOption( 'lineNumbers', $( '#tool-numbers' ).is( ':checked' ) );
 		
 		var checked = $( '#tool-fullscreen' ).is( ':checked' );
 		$( '#holder' ).css( 'width', checked ? '100%' : '' );
 
-		if( typeof( window.code_theme ) != 'undefined' ) {
+		if( typeof( window.code_theme ) != 'undefined' )
+		{
 			editor.setOption( 'theme', window.code_theme );
 		}
 
-		$( '#showhex' ).bind( 'click', function() {
+		$( '#showhex' ).on( 'click', function() {
 			$( '#content_container' ).toggle();
 		} );
 		
@@ -751,14 +793,15 @@ $( function() {
 		}
 		else
         {
-			/* fetch paste */
+			// fetch paste
 			requestData( true );
 		}
 	}
 	else if( window.ncrypt_paste )
     {
 		paste = window.ncrypt_paste;
-		if( typeof( window.ncrypt_paste.theme ) != 'undefined' ) {
+		if( typeof( window.ncrypt_paste.theme ) != 'undefined' )
+		{
 			editor.setOption( 'theme', window.ncrypt_paste.theme );
 		}
 		decrypt_update();
