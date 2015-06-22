@@ -301,7 +301,7 @@ input.tool-button:checked + label
 #decrypting #download-progress
 {
 	display: none;
-	margin-top: 25;
+	margin-top: 25px;
 }
 
 textarea
