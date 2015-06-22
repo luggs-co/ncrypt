@@ -79,9 +79,10 @@
 					$this->incl( $template_name );
 					break;
 				case 'json':
+					$json = json_encode( $object );
 					header( 'Content-Type: application/json' );
-					header( 'Content-Length: ' . mb_strlen( $object['data'] ) );
-					echo json_encode( $object );
+					header( 'Content-Length: ' . mb_strlen( $json ) );
+					echo $json;
 					break;
 				case 'raw':
 					header( 'Content-Type: application/octet-stream' );
