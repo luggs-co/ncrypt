@@ -10,7 +10,7 @@
  * For more specific usage see the documentation navigate to:
  * http://code.google.com/p/php-mobile-detect/wiki/Mobile_Detect
  * 
- * @license    http://www.opensource.org/licenses/mit-license.php The MIT License
+ * @license	http://www.opensource.org/licenses/mit-license.php The MIT License
  */
 class Mobile
 {

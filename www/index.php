@@ -14,18 +14,18 @@
 		{
 			switch( $parts[0] )
 			{
-			    case 'about':
-				    $controller->about();
-				    break;
-			    case 'ncrypt':
-				    $controller->ncrypt_script();
-				    break;
-			    case 'p': // "safe" urls working with all paste ids
-				    $controller->show( count( $parts ) >= 2 ? $parts[1] : '', $password );
-				    break;
-			    default: // paste ids that are not "special"
-				    $controller->show( $parts[0], $password );
-				    break;
+				case 'about':
+					$controller->about();
+					break;
+				case 'ncrypt':
+					$controller->ncrypt_script();
+					break;
+				case 'p': // "safe" urls working with all paste ids
+					$controller->show( count( $parts ) >= 2 ? $parts[1] : '', $password );
+					break;
+				default: // paste ids that are not "special"
+					$controller->show( $parts[0], $password );
+					break;
 			}
 		}
 		elseif( !empty( $_POST ) )

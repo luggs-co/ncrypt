@@ -44,14 +44,14 @@
 			if (false !== ( $paste = db_read( $paste_meta['id'] ) ))
 			{
 				switch ($paste['crypto']) {
-				    case 'PIDCRYPT':
-					    $cipher = 'AES-128-CBC';
-					    break;
-				    case 'CRYPTO_JS':
-					    $cipher = 'AES-256-OFB';
-					    break;
-				    default:
-					    $cipher = $paste['crypto'];
+					case 'PIDCRYPT':
+						$cipher = 'AES-128-CBC';
+						break;
+					case 'CRYPTO_JS':
+						$cipher = 'AES-256-OFB';
+						break;
+					default:
+						$cipher = $paste['crypto'];
 				}
 
 				if ( -100 == $paste['ttl'] )

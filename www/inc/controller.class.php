@@ -9,10 +9,10 @@
 
 		function __construct()
 		{
-            $conf = get_config();
+			$conf = get_config();
 			$this->template = new Template();
 			$this->template->assign( 'meta_title', $conf['site']['name'] );
-            $this->template->assign( 'bitcoin_address', $conf['bitcoin-addresses'][mt_rand( 0, count( $conf['bitcoin-addresses'] ) - 1 )] );
+			$this->template->assign( 'bitcoin_address', $conf['bitcoin-addresses'][mt_rand( 0, count( $conf['bitcoin-addresses'] ) - 1 )] );
 
 			if( isset( $_GET['raw'] ) )
 			{
@@ -52,12 +52,12 @@
 			// detect if any errors came through
 			switch( $paste )
 			{
-			    case NCRYPT_DOES_NOT_EXIST:
-			    case NCRYPT_HAS_EXPIRED:
-			    case NCRYPT_MISSING_DATA:
-				    $template->assign( 'meta_title', $conf['site']['name'] . ' - Paste does not exist' );
-				    $template->render( 404, 'nonexistant.tpl' );
-				    return;
+				case NCRYPT_DOES_NOT_EXIST:
+				case NCRYPT_HAS_EXPIRED:
+				case NCRYPT_MISSING_DATA:
+					$template->assign( 'meta_title', $conf['site']['name'] . ' - Paste does not exist' );
+					$template->render( 404, 'nonexistant.tpl' );
+					return;
 			}
 
 			// validate paste, check if password has been set
@@ -65,33 +65,33 @@
 
 			switch( $validated )
 			{
-			    case NCRYPT_PASSWORD_FAILED:
-				    // incorrect, give the json response an error
-			    case NCRYPT_PASSWORD_REQUIRED:
-				    // prompt user for password
+				case NCRYPT_PASSWORD_FAILED:
+					// incorrect, give the json response an error
+				case NCRYPT_PASSWORD_REQUIRED:
+					// prompt user for password
 
-				    $template->assign( 'meta_title', $conf['site']['name'] . ' - Paste requires password' );
-				    $template->render( 403, 'paste.tpl' );
-				    break;
+					$template->assign( 'meta_title', $conf['site']['name'] . ' - Paste requires password' );
+					$template->render( 403, 'paste.tpl' );
+					break;
 
-			    case NCRYPT_PASSWORD_SUCCESS:
-				    // correct, send user the required data
-			    case NCRYPT_NO_PASSWORD:
-				    // no password, show paste
+				case NCRYPT_PASSWORD_SUCCESS:
+					// correct, send user the required data
+				case NCRYPT_NO_PASSWORD:
+					// no password, show paste
 
-				    if ( 'html' !== $template->format() ) {
-					    $output = $pastes->read( $paste );
-				    } else {
-					    // read paste via javascript to make basic page loading faster
-					    $output = array();
-				    }
+					if ( 'html' !== $template->format() ) {
+						$output = $pastes->read( $paste );
+					} else {
+						// read paste via javascript to make basic page loading faster
+						$output = array();
+					}
 
-				    $template->assign( 'meta_title', $conf['site']['name'] . ' - Paste' );
-				    $template->render( 200, 'paste.tpl', $output );
-				    break;
+					$template->assign( 'meta_title', $conf['site']['name'] . ' - Paste' );
+					$template->render( 200, 'paste.tpl', $output );
+					break;
 
-			    default:
-				    throw new Exception( 'Internal error' );
+				default:
+					throw new Exception( 'Internal error' );
 			}
 		}
 
