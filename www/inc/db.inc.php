@@ -52,5 +52,5 @@
 	{
 		$db = db_connection();
 
-		return db_backend_delete($db, (int) $id);
+		return db_backend_delete($db, intval($id));
 	}
