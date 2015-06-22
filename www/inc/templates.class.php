@@ -1,8 +1,9 @@
 <?php
 
-	# replace bad chars with a space for safe use in header()
-	function strip_unsafe_header($value) {
-		return preg_replace('/[^\x20-\x7e]+/', ' ', $value);
+	// replace bad chars with a space for safe use in header()
+	function strip_unsafe_header( $value )
+	{
+		return preg_replace( '/[^\x20-\x7e]+/', ' ', $value );
 	}
 
 	/**
@@ -79,17 +80,32 @@
 					$this->incl( $template_name );
 					break;
 				case 'json':
-					$json = gzencode( json_encode( $object ) );
 					header( 'Content-Type: application/json' );
-					header( 'Content-Length: ' . mb_strlen( $json ) );
-					header( 'Content-Encoding: gzip' );
-					echo $json;
+					$json = json_encode( $object );
+					
+					if( stripos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false )
+					{
+						// if client accepts gzip, compress the data and send to client
+						// this is so we can generate a progress report on pastes
+						ob_start();
+						ob_start( 'ob_gzhandler' );
+						header( 'Content-Encoding: gzip' );
+						echo $json;
+						ob_end_flush();
+						header( 'Content-Length: ' . ob_get_length() );
+						ob_end_flush();
+					}
+					else
+					{
+						header( 'Content-Length: ' . mb_strlen( $json ) );
+						echo $json;
+					}
+					
 					break;
 				case 'raw':
 					header( 'Content-Type: application/octet-stream' );
 					if (!empty( $object['syntax'] )) header( 'X-Syntax: ' . strip_unsafe_header( $object['syntax'] ) );
 					if (!empty( $object['cipher'] )) header( 'X-Cipher: ' . strip_unsafe_header( $object['cipher'] ) );
-					header( 'Content-Length: ' . mb_strlen( $object['data'] ) );
 					echo $object['data'];
 					break;
 			}
