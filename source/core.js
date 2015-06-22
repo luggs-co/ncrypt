@@ -378,7 +378,6 @@ $( function() {
 			},
 			xhrFields: {
 				onprogress: function (e) {
-					console.log( e );
 					if( e.lengthComputable )
 					{
 						console.log( e.loaded / e.total * 100 + '%' );
