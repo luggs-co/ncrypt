@@ -4,8 +4,9 @@
 			</div>
 
 			<div style="position: relative;">
+				<input type="hidden" id="new_result" name="new_result" />
 				<textarea id="new_text" name="new_text" spellcheck="false"></textarea>
-				<textarea id="new_result" name="new_result" readonly spellcheck="false"></textarea>
+				<textarea id="new_preview" name="new_preview" readonly spellcheck="false"></textarea>
 				<div id="new_encrypttime"></div>
 			</div>
 
