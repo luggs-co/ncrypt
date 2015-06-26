@@ -366,13 +366,14 @@ $( function() {
 			cache: false,
 			beforeSend: function() {
 				$( '#decrypting' ).css( 'background-image', 'url(../img/downloading.gif)' );
-				$( '#download-progress' ).show();
+				$( '#download-progress, #download-stats' ).show();
 			},
 			xhrFields: {
 				onprogress: function (e) {
 					if( e.lengthComputable )
 					{
 						$( '#download-progress' ).val( ( e.loaded / e.total * 100 ) );
+						$( '#download-stats' ).html( e.loaded + " of " + e.total + " (" + ( e.loaded / e.total * 100 ) + "%)" );
 					}
 				}
 			},
@@ -383,7 +384,7 @@ $( function() {
 				paste.cipher = json.cipher;
 
 				$( '#decrypting' ).css( 'background-image', 'url(../img/decrypting.gif)' );
-				$( '#download-progress' ).hide();
+				$( '#download-progress, #download-stats' ).hide();
 
 				decrypt_update();
 			},
