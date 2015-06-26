@@ -21,7 +21,7 @@
 					<a id="clone">Clone</a>
 					<a id="saveas">Save as</a>
 					<a id="showhex">Show hex</a>
-					
+
 					<input type="checkbox" <?=(isset($cookie['linnumbers']) && $cookie['linenumbers']=='true')?' checked="checked"':'';?> id="tool-numbers" class="tool-button" />
 					<label for="tool-numbers" title="Toggle Numbers"></label>
 
@@ -30,11 +30,11 @@
 
 					<input type="checkbox" <?=(isset($cookie['fullscreen']) && $cookie['fullscreen']=='true')?' checked="checked"':'';?> id="tool-fullscreen" class="tool-button" />
 					<label for="tool-fullscreen" title="Fullscreen"></label>
-					
+
 					<?php $this->incl('includes/theme-select.tpl'); ?>
 				</div>
 				<div id="wrap" style="clear: both;"></div>
-				<div id="decrypting"><progress id="download-progress" max="100" value="0"></progress></div>
+				<div id="decrypting"><progress id="download-progress" max="100" value="0"></progress><div id="download-stats"></div></div>
 				<div id="alternate_content"></div>
 				<div id="content_container">
 					<input type="hidden" id="content" />
