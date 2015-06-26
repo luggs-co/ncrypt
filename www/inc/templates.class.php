@@ -8,11 +8,11 @@
 
 	/**
 	 * Basic PHP based template system
-	 * 
+	 *
 	 * Allows simple variable assigning to the template class
 	 * so have more control over feel of the site and not have it all
 	 * clumped into one massive file with html injected on the fly
-	 * 
+	 *
 	 * @author NovaKing
 	 * @version 0.4
 	 **/
@@ -55,9 +55,9 @@
 		{
 			switch ( $code )
 			{
-				case 200: return "OK";
-				case 403: return "Forbidden";
-				case 404: return "Not found";
+				case 200: return 'OK';
+				case 403: return 'Forbidden';
+				case 404: return 'Not found';
 				default: throw new Exception( 'Unknown status code' );
 			}
 		}
@@ -82,7 +82,7 @@
 				case 'json':
 					header( 'Content-Type: application/json' );
 					$json = json_encode( $object );
-					
+
 					if( stripos( $_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip' ) !== false )
 					{
 						// if client accepts gzip, compress the data and send to client
@@ -100,7 +100,7 @@
 						header( 'Content-Length: ' . mb_strlen( $json ) );
 						echo $json;
 					}
-					
+
 					break;
 				case 'raw':
 					header( 'Content-Type: application/octet-stream' );
