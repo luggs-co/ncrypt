@@ -11,7 +11,7 @@ js-sjcl:
 	./develop/js-preprocess.sh source/sjcl.backend.js www/jslibs/sjcl
 
 js-main:
-	cd source; ../develop/js-sha1-versioned.sh ../www/jslibs/main Blob.js/Blob.js FileSaver.js/FileSaver.js core.js cookies.js
+	cd source; ../develop/js-sha1-versioned.sh ../www/jslibs/main Blob.js/Blob.js FileSaver.js/FileSaver.js mimetypes.js cookies.js core.js
 
 js-codemirror-modes:
 	./develop/codemirror-combine-modes.sh www/jslibs/codemirror-modes
