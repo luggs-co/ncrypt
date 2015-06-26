@@ -80,7 +80,7 @@ a:hover
 	padding: 5px;
 }
 
-#new_result
+#new_preview
 {
 	display: none;
 	position: absolute;
@@ -246,7 +246,7 @@ input.tool-button:checked + label
 	bottom: 10px;
 	height: 15px;
 	font-size: 10px;
-	color: #CECECE;	
+	color: #CECECE;
 }
 
 #speed
@@ -294,8 +294,8 @@ input.tool-button:checked + label
 	left: 40px;
 	margin-top: 5px;
 	z-index: 100;
-	height: 25px;
-	background: url(../img/loading.gif) top left no-repeat;
+	height: 50px;
+	background: url(../img/init.gif) top left no-repeat;
 }
 
 #decrypting #download-progress
