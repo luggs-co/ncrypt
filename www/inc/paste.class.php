@@ -11,11 +11,11 @@
 
 	/**
 	 * Basic PHP based paste system
-	 * 
+	 *
 	 * Allows getting and adding of pastes.
 	 * Can check to see if a paste has expired, and prunes accordingly.
 	 * Validates against password if one exists
-	 * 
+	 *
 	 * @author NovaKing
 	 * @version 0.4
 	 **/
@@ -70,17 +70,18 @@
 
 		function add( $data, $syntax, $ttl, $password, $cipher )
 		{
-			if (!empty($password)) {
+			if( !empty( $password ) )
+			{
 				// create a salt that ensures crypt creates an md5 hash
 				$base64_alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 				$salt = '$5$';
-				for($i=0; $i<16; $i++) $salt .= $base64_alphabet[rand(0,63)];
+				for( $i = 0; $i < 16; $i++ ) $salt .= $base64_alphabet[rand( 0, 63 )];
 				$salt .= '$';
-				$password = crypt($password, $salt);
+				$password = crypt( $password, $salt );
 			}
 
 			// submit new paste to server
-			return db_add($data, $syntax, $ttl, $password, $cipher);
+			return db_add( $data, $syntax, $ttl, $password, $cipher );
 		}
 
 		function validate_password( $paste, $password )
@@ -88,7 +89,7 @@
 			// if we haven't gotten a paste yet.
 			if( empty( $paste ) ) return NCRYPT_MISSING_DATA;
 
-			if (!empty($paste['password']))
+			if( !empty( $paste['password'] ) )
 			{
 				if (empty($password))
 				{
@@ -96,18 +97,18 @@
 					return NCRYPT_PASSWORD_REQUIRED;
 				}
 
-				if (strlen($paste['password']) == 40 && '$' != $paste['password'][0])
+				if( strlen( $paste['password'] ) == 40 && '$' != $paste['password'][0] )
 				{
 					// old style, salted with id
-					$password = sha1($paste['id'] . $password);
+					$password = sha1( $paste['id'] . $password );
 				}
 				else
 				{
 					// crypted
-					$password = crypt($password, $paste['password']);
+					$password = crypt( $password, $paste['password'] );
 				}
 
-				if (0 == strcmp($password, $paste['password']))
+				if( 0 == strcmp( $password, $paste['password'] ) )
 				{
 					// correct, send user the required data
 					return NCRYPT_PASSWORD_SUCCESS;
