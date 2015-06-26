@@ -8,12 +8,12 @@
  * - added code color themes
  * - added use of cookies to remember user preferences (theme,fullscreen,linenumbers,linewrap)
  * - upload file now shows preview, use submit to upload to server
- *  
+ *
  * @version: 0.4
  * @author: NovaKing (novaking@eztv.se)
- * 
+ *
  * General functions that get used within the website
- * 
+ *
  **/
 
 $( function() {
@@ -29,7 +29,7 @@ $( function() {
 		worker = new Worker( window.ncrypt_crypto_backend_url );
 		worker_pending = {};
 		worker_next_id = 0;
-		
+
 		worker.onmessage = function( event ) {
 			var data = event.data;
 			if( !data.id ) return;
@@ -37,12 +37,12 @@ $( function() {
 			if( !obj ) return;
 			if( !data.hasOwnProperty( 'progress' ) ) delete worker_pending[data.id];
 			obj( data.result, data.error, data.progress );
-		}
-		
+		};
+
 		window.ncrypt_backend.randomKey( function( key ) {
 			worker.postMessage( { id: 0, func: '_add_entropy', arguments: [key, 128, 'ncrypt backend random'] } );
 		} );
-		
+
 		worker_send = function( func, args, cb ) {
 			if( !worker_has_entropy )
 			{
@@ -129,10 +129,10 @@ $( function() {
 		var offprefix = bytes.length.toString( 16 ).replace( /./g, '0' )
 		var BYTES_PER_LINE = 20;
 		var lines = [], bline, offset = 0, line, i, j;
-		
+
 		lines.push( 'Binary file of type: ' + syntax + "\n" );
 		lines.push( "\n" );
-		
+
 		while( offset < bytes.length )
 		{
 			if( limit >= 0 && offset >= limit )
@@ -141,11 +141,11 @@ $( function() {
 				lines.push( "too much data, stopping now\n" );
 				break;
 			}
-			
+
 			bline = bytes.slice( offset, offset + BYTES_PER_LINE );
 			line = ( offprefix + offset.toString( 16 ) ).slice( -offprefix.length ) + ':';
 			offset += bline.length;
-			
+
 			for( i = 0; i < BYTES_PER_LINE; )
 			{
 				line += ' ';
@@ -161,9 +161,9 @@ $( function() {
 					}
 				}
 			}
-			
+
 			line += '| ';
-			
+
 			// replace non printable characters (in unicode <= 0xff) with '.'; each byte is treated as a separate unicode codepoint
 			line += String.fromCharCode.apply( String, bline ).replace( /[\0-\x1F\x7F-\x9F\xAD]/g, '.' )
 			line += "\n";
@@ -171,14 +171,14 @@ $( function() {
 		}
 		return lines.join( '' );
 	}
-	
+
 	function select_theme( theme )
 	{
 		if( typeof( theme ) == 'undefined' )
 		{
 			theme = document.getElementById("select").options[document.getElementById("select").selectedIndex].innerHTML;
 		}
-		
+
 		window.editor.setOption("theme", theme);
 		_cookies.setItem( 'theme', theme, 31536e3, '/' );
 	}
@@ -207,7 +207,7 @@ $( function() {
 		var key = paste.key || window.location.hash.substring( 1 );
 		var data = paste.data;
 		var cipher = paste.cipher;
-		
+
 		if( '' == data )
 		{
 			$( '#askpassword' ).show();
@@ -218,7 +218,7 @@ $( function() {
 		{
 			$( '#askpassword' ).hide();
 		}
-		
+
 		if( '' == key )
 		{
 			$( '#insertkey' ).show();
@@ -231,7 +231,7 @@ $( function() {
 		}
 
 		$( '#decrypting' ).show();
-		
+
 		// start timer and decrypt
 		var t = new TimeDiff();
 		window.ncrypt.async_decrypt( [key, data, cipher], function( output, error ) {
@@ -266,7 +266,7 @@ $( function() {
 
 					$( '#showhex' ).hide();
 					$( '#clone' ).show();
-					
+
 					// copy syntax if paste is a real paste, not the index example
 					if ( $( '#clone' ).length ) set_new_syntax( paste.syntax );
 				}
@@ -322,23 +322,12 @@ $( function() {
 
 				if( blob )
 				{
-					console.log( paste.syntax );
 					$( '#saveas' ).show().on( 'click', function() {
 						// basic test to determine file extension
-						switch( paste.syntax )
-						{
-							case 'image/png':					ext = '.png';  break;
-							case 'image/jpeg':					ext = '.jpg';  break;
-							case 'image/bmp':					ext = '.bmp';  break;
-							case 'image/tiff':					ext = '.tiff'; break;
-							case 'application/zip':
-							case 'application/x-zip':			ext = '.zip';  break;
-							case 'application/gzip':			ext = '.gz';   break;
-							case 'application/x-7z-compressed':	ext = '.7z';   break;
-							case 'text/plain':
-							default:							ext = '.txt';  break;
-						}
-						saveAs( blob, window.location.pathname.replace( '/p/', '' ) + ext );
+						var ext = mimetypes[paste.syntax];
+						if( 'undefined' == typeof ext ) ext = 'txt';
+
+						saveAs( blob, window.location.pathname.replace( '/p/', '' ) + '.' + ext );
 					} );
 				}
 				else
@@ -392,7 +381,7 @@ $( function() {
 				paste.data = json.data;
 				paste.syntax = json.syntax;
 				paste.cipher = json.cipher;
-				
+
 				$( '#decrypting' ).css( 'background-image', 'url(../img/decrypting.gif)' );
 				$( '#download-progress' ).hide();
 
@@ -454,10 +443,10 @@ $( function() {
 		var key = $( '#new_key' ).val();
 		var text = $( '#new_text' ).val();
 		var cipher = $( '#new_cipher' ).val();
-		$( '#new_result' ).html('');
+		$( '#new_result, #new_preview' ).html('');
 		$( '#new_encrypttime' ).html('');
 
-		if ('' == key || '' == text) return ''; /* don't do anything without key and text */
+		if( '' == key || '' == text ) return ''; /* don't do anything without key and text */
 
 		// start timer and encrypt
 		var t = new TimeDiff();
@@ -484,11 +473,12 @@ $( function() {
 
 				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
 				$( '#new_result' ).val( result );
+				$( '#new_preview' ).val( stringBreak( result.substring( 0, 2600 ), 96 ) );
 			}
 
 			var i, len, l = progress ? _encrypt_finished.slice() : _encrypt_finished.splice( 0 );
 			_encryptResult = [result, error, progress];
-			
+
 			for( i = 0, len = l.length; i < len; ++i )
 			{
 				l[i].call( this, _encryptResult );
@@ -500,9 +490,9 @@ $( function() {
 	function encrypt_update_delayed()
 	{
 		$( '#new_text' ).css( 'background-image', 'none' );
-		
+
 		if( delayedEncryptionInProgress != null ) { clearTimeout( delayedEncryptionInProgress ); delayedEncryptionInProgress = null; }
-		
+
 		delayedEncryptionInProgress = setTimeout( function() {
 			delayedEncryptionInProgress = null;
 			encrypt_update();
@@ -519,7 +509,7 @@ $( function() {
 		var reader = new FileReader();
 		reader.onload = function() {
 			var bytes = new Uint8Array( reader.result );
-			
+
 			try
 			{
 				if( file && syntax.match( /^image\// ) )
@@ -540,16 +530,18 @@ $( function() {
 				console.log( "special binary handling failed:" );
 				console.log( e );
 			}
-				
+
+			// show some progress indicator
 			window.ncrypt.async_encrypt( [key, bytes, cipher, { binary: true }], function ( data /*, error, progress */ ) {
 				if( !data ) return;
 				$( '#new_result' ).val( data );
+				$( '#new_preview' ).val( stringBreak( data.substring( 0, 2600 ), 96 ) );
 			} );
 		};
-		
+
 		reader.readAsArrayBuffer( file );
 	}
-	
+
 	function submitFile()
 	{
 		var key = $( '#new_key' ).val();
@@ -564,7 +556,7 @@ $( function() {
 			// if password is used, let's sha the password before we send it over
 			password = window.ncrypt_backend.sha( $( '#new_typepassword' ).val() );
 		}
-		
+
 		// send submission to server
 		$.ajax( {
 			url: document.baseURI,
@@ -598,7 +590,7 @@ $( function() {
 	{
 		if( $( '#new_text' ).val() == '' )
 		{
-			if( $( '#new_text' ).css( 'background-image' ) != '' )
+			if( $( '#new_result' ).val() != '' )
 			{
 				submitFile();
 			}
@@ -667,9 +659,9 @@ $( function() {
 			lineWrapping: true,
 			readOnly: true
 		} );
-		
+
 		editor.on( 'change', onCodeChange );
-		
+
 		window.editor = editor;
 	}
 
@@ -689,7 +681,7 @@ $( function() {
 			en.on( 'click', submitData );
 			en.removeAttr( 'disabled' );
 			en.val( 'Submit' );
-			
+
 			$( '#upload_file' ).on( 'change', displayFile );
 			if( 'undefined' !== typeof FileReader ) $( '#upload' ).show();
 
@@ -703,17 +695,17 @@ $( function() {
 			// hover effect when moving mouse over submit button
 			en.hover(
 				function() {
-					$( '#new_result' ).show();
+					$( '#new_preview' ).show();
 					$( '#new_encrypttime' ).show();
 				},
 				function() {
-					$( '#new_result' ).hide();
+					$( '#new_preview' ).hide();
 					$( '#new_encrypttime' ).hide();
 				}
 			);
 		} );
 	}
-	
+
 	$( '#popup .close' ).on( 'click', function() { $( '#overlay' ).hide(); } );
 
 	$( '#new_usepassword' ).change( function() {
@@ -733,12 +725,12 @@ $( function() {
 
 		/* want to show a paste */
 		$( '#submitpassword' ).on( 'click', function() { requestData(false); } );
-		
+
 		$( '#submitkey' ).on( 'click', function() {
 			paste.key = $( '#typekey' ).val();
 			decrypt_update();
 		} );
-		
+
 		$( '#typepassword,#typekey' ).on( 'keydown', function( e ) {
 			if( e.keyCode == 13 )
 			{
@@ -748,10 +740,10 @@ $( function() {
 
 		$( '#new' ).on( 'click', function() {
 			$( '#new_text' ).html( '' );
-			$( '#new_result' ).val( '' );
+			$( '#new_result, #new_preview' ).val( '' );
 			$( '#newpaste' ).slideDown();
 		} );
-		
+
 		$( '#clone' ).on( 'click', function() {
 			set_new_syntax( paste.syntax );
 			$( '#new_text' ).html( editor.getValue() ).trigger( 'textchange' );
@@ -770,28 +762,28 @@ $( function() {
 			editor.setOption( 'lineWrapping', checked );
 			_cookies.setItem( 'linewrap', checked, 31536e3, '/' );
 		} );
-		
+
 		$( '#tool-numbers' ).on( 'click', function() {
 			var checked = $( '#tool-numbers' ).is( ':checked' );
 			editor.setOption( 'lineNumbers', checked );
 			_cookies.setItem( 'linenumbers', checked, 31536e3, '/' );
 		} );
-		
+
 		$( '#tool-fullscreen' ).on( 'click', function() {
 			var checked = $( '#tool-fullscreen' ).is( ':checked' );
 			$( '#holder' ).css( 'width', checked ? '100%' : '' );
 			_cookies.setItem( 'fullscreen', checked, 31536e3, '/' );
 		} );
-		
+
 		$( '#theme-select' ).change( function() {
 			select_theme( this.value );
 		} );
-		
+
 		// cookies have set the state of the toolbars, here we read them to determine if we modify the interface
 		editor.setOption( 'lineWrapping', $( '#tool-wrap' ).is( ':checked' ) );
-		
+
 		editor.setOption( 'lineNumbers', $( '#tool-numbers' ).is( ':checked' ) );
-		
+
 		var checked = $( '#tool-fullscreen' ).is( ':checked' );
 		$( '#holder' ).css( 'width', checked ? '100%' : '' );
 
@@ -803,7 +795,7 @@ $( function() {
 		$( '#showhex' ).on( 'click', function() {
 			$( '#content_container' ).toggle();
 		} );
-		
+
 		if( window.ncrypt_paste )
 		{
 			paste = window.ncrypt_paste;
