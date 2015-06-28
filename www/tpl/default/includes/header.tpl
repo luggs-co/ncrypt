@@ -32,6 +32,10 @@
 				<div style="height: 5px;"></div>
 				Please note that the above URL can only be used once, as it will be deleted after being displayed.
 			</div>
+			<div id="upload-paste">
+				<progress id="upload-progress" max="100" value="0"></progress>
+				<div id="upload-stats"></div>
+			</div>
 		</div>
 		<div id="holder">
 			<div id="header" class="gradient">
