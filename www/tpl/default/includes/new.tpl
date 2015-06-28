@@ -8,6 +8,7 @@
 				<textarea id="new_text" name="new_text" spellcheck="false"></textarea>
 				<textarea id="new_preview" name="new_preview" readonly spellcheck="false"></textarea>
 				<div id="new_encrypttime"></div>
+				<div id="new_encrypting"><span></span><span></span><span></span></div>
 			</div>
 
 			<div id="options">
