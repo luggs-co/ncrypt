@@ -24,7 +24,7 @@ $( function() {
 	// data for fetched paste
 	var paste = { data: '', cipher: '', syntax: '', key: false, highlight_options: { } };
 
-	if( typeof Worker !== 'undefined' && typeof window.ncrypt_worker === 'undefined' )
+	if( 'undefined' !== typeof Worker && 'undefined' === typeof window.ncrypt_worker )
 	{
 		worker = new Worker( window.ncrypt_crypto_backend_url );
 		worker_pending = {};
@@ -100,12 +100,32 @@ $( function() {
 		for( var i = 0; i < str.length; i++ )
 		{
 			result += str.charAt( i );
-			if ( ( ( i + 1 ) % col == 0 ) && ( 0 < i ) )
+			if ( ( 0 == ( ( i + 1 ) % col ) ) && ( 0 < i ) )
 			{
 				result += "\n";
 			}
 		}
 		return result;
+	}
+
+	function formatSizeUnits( bytes )
+	{
+		if ( ( bytes >> 30 ) & 0x3FF )
+			bytes = ( bytes >>> 30 ) + '.' + ( bytes & ( 3 * 0x3FF ) ) + ' GB' ;
+		else if ( ( bytes >> 20 ) & 0x3FF )
+			bytes = ( bytes >>> 20 ) + '.' + ( bytes & ( 2 * 0x3FF ) ) + ' MB' ;
+		else if ( ( bytes >> 10 ) & 0x3FF )
+			bytes = ( bytes >>> 10 ) + '.' + ( bytes & ( 0x3FF ) ) + ' KB' ;
+		else if ( ( bytes >> 1 ) & 0x3FF )
+			bytes = ( bytes >>> 1 ) + ' Bytes' ;
+		else
+			bytes = bytes + ' Byte' ;
+		return bytes ;
+	}
+
+	function formatPercent( current, total )
+	{
+		return ( current / total * 100 ).toFixed( 2 );
 	}
 
 	// determine duration taken to render the syntax highlighter
@@ -174,12 +194,12 @@ $( function() {
 
 	function select_theme( theme )
 	{
-		if( typeof( theme ) == 'undefined' )
+		if( 'undefined' === typeof theme )
 		{
 			theme = document.getElementById("select").options[document.getElementById("select").selectedIndex].innerHTML;
 		}
 
-		window.editor.setOption("theme", theme);
+		window.editor.setOption( 'theme', theme );
 		_cookies.setItem( 'theme', theme, 31536e3, '/' );
 	}
 
@@ -372,8 +392,9 @@ $( function() {
 				onprogress: function (e) {
 					if( e.lengthComputable )
 					{
-						$( '#download-progress' ).val( ( e.loaded / e.total * 100 ) );
-						$( '#download-stats' ).html( e.loaded + " of " + e.total + " (" + ( e.loaded / e.total * 100 ) + "%)" );
+						var per = formatPercent( e.loaded, e.total );
+						$( '#download-progress' ).val( per );
+						$( '#download-stats' ).html( formatSizeUnits( e.loaded ) + " of " + formatSizeUnits( e.total ) + " (" + per + "%)" );
 					}
 				}
 			},
@@ -444,8 +465,9 @@ $( function() {
 		var key = $( '#new_key' ).val();
 		var text = $( '#new_text' ).val();
 		var cipher = $( '#new_cipher' ).val();
-		$( '#new_result, #new_preview' ).html('');
-		$( '#new_encrypttime' ).html('');
+		$( '#new_result, #new_preview' ).html( '' );
+		$( '#new_encrypttime' ).html( '' );
+		$( '#new_encrypting' ).show();
 
 		if( '' == key || '' == text ) return ''; /* don't do anything without key and text */
 
@@ -473,8 +495,9 @@ $( function() {
 				result = stringBreak( result, 96 );
 
 				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
+				$( '#new_encrypting' ).hide();
 				$( '#new_result' ).val( result );
-				$( '#new_preview' ).val( stringBreak( result.substring( 0, 2600 ), 96 ) );
+				$( '#new_preview' ).val( result.substring( 0, 2650 ) );
 			}
 
 			var i, len, l = progress ? _encrypt_finished.slice() : _encrypt_finished.splice( 0 );
@@ -533,14 +556,49 @@ $( function() {
 			}
 
 			// show some progress indicator
+			$( '#new_encrypttime' ).html( '' );
+			$( '#new_encrypting' ).show();
+			var t = new TimeDiff();
 			window.ncrypt.async_encrypt( [key, bytes, cipher, { binary: true }], function ( data /*, error, progress */ ) {
 				if( !data ) return;
+				$( '#new_encrypting' ).hide();
+				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
 				$( '#new_result' ).val( data );
 				$( '#new_preview' ).val( stringBreak( data.substring( 0, 2600 ), 96 ) );
 			} );
 		};
 
 		reader.readAsArrayBuffer( file );
+	}
+
+	function disableHover()
+	{
+		$( '#en' ).unbind( 'mouseenter mouseleave' );
+	}
+
+	function enableHover()
+	{
+		// hover effect when moving mouse over submit button
+		$( '#en' ).hover(
+			function() {
+				$( '#new_preview' ).show();
+				$( '#new_encrypttime' ).show();
+			},
+			function() {
+				$( '#new_preview' ).hide();
+				$( '#new_encrypttime' ).hide();
+			}
+		);
+	}
+
+	function upload_progress( e )
+	{
+		console.log( e );
+		if( e.lengthComputable )
+		{
+			$( '#upload-progress' ).val( ( e.loaded / e.total * 100 ) );
+			$( '#upload-stats' ).html( e.loaded + " of " + e.total + " (" + ( e.loaded / e.total * 100 ) + "%)" );
+		}
 	}
 
 	function submitFile()
@@ -558,6 +616,10 @@ $( function() {
 			password = window.ncrypt_backend.sha( $( '#new_typepassword' ).val() );
 		}
 
+		disableHover();
+		$( '#new_result' ).show();
+		$( '#new_encrypttime' ).show();
+
 		// send submission to server
 		$.ajax( {
 			url: document.baseURI,
@@ -565,10 +627,30 @@ $( function() {
 			dataType: 'json',
 			data: 'data=' + encodeURIComponent( $( '#new_result' ).val() ) + '&p=' + password + '&ttl=' + encodeURIComponent( ttl ) + '&syn=' + encodeURIComponent( syntax ) + '&cipher=' + encodeURIComponent( cipher ),
 			cache: false,
+			beforeSend: function( xhrobj ) {
+				$( '#popup' ).hide();
+				$( '#upload-paste' ).css( 'background-image', 'url(../img/uploading.gif)' );
+				$( '#upload-paste, #upload-progress, #upload-stats' ).show();
+				$( '#overlay' ).show();
+			},
+			xhr: function() {
+				var xhr = new window.XMLHttpRequest();
+				// Upload progress
+				xhr.upload.addEventListener( 'progress', function( e ) {
+					if( e.lengthComputable )
+					{
+						var per = formatPercent( e.loaded, e.total );
+						$( '#upload-progress' ).val( per );
+						$( '#upload-stats' ).html( formatSizeUnits( e.loaded ) + " of " + formatSizeUnits( e.total ) + " (" + per + "%)" );
+					}
+				}, false );
+
+				return xhr;
+			},
 			success: function( json ) {
 				var querypw = '';
-				if( password != '' ) querypw = '?p=' + password;
-				if( ttl == -100 )
+				if( '' != password ) querypw = '?p=' + password;
+				if( -100 == ttl )
 				{
 					// special condition when it's a one-time only paste, we don't redirect the user as that would trigger the delete call
 					// instead we simply mock the page and provide the url of the paste
@@ -589,9 +671,9 @@ $( function() {
 
 	function submitData()
 	{
-		if( $( '#new_text' ).val() == '' )
+		if( '' == $( '#new_text' ).val() )
 		{
-			if( $( '#new_result' ).val() != '' )
+			if( '' != $( '#new_result' ).val() )
 			{
 				submitFile();
 			}
@@ -609,6 +691,10 @@ $( function() {
 			// if password is used, let's sha the password before we send it over
 			password = window.ncrypt_backend.sha( $( '#new_typepassword' ).val() );
 		}
+
+		disableHover();
+		$( '#new_result' ).show();
+		$( '#new_encrypttime' ).show();
 
 		encrypt_finished( function( data ) {
 			if( !data ) return;
@@ -693,20 +779,11 @@ $( function() {
 			// support ctrl+enter to send paste
 			text.on( 'keydown', function( e ) { if( e.keyCode == 13 && e.ctrlKey ) { en.click(); } } );
 
-			// hover effect when moving mouse over submit button
-			en.hover(
-				function() {
-					$( '#new_preview' ).show();
-					$( '#new_encrypttime' ).show();
-				},
-				function() {
-					$( '#new_preview' ).hide();
-					$( '#new_encrypttime' ).hide();
-				}
-			);
+			enableHover();
 		} );
 	}
 
+	// close trigger for burn after reading
 	$( '#popup .close' ).on( 'click', function() { $( '#overlay' ).hide(); } );
 
 	$( '#new_usepassword' ).change( function() {
@@ -788,7 +865,7 @@ $( function() {
 		var checked = $( '#tool-fullscreen' ).is( ':checked' );
 		$( '#holder' ).css( 'width', checked ? '100%' : '' );
 
-		if( typeof( window.code_theme ) != 'undefined' )
+		if( 'undefined' !== typeof window.code_theme )
 		{
 			editor.setOption( 'theme', window.code_theme );
 		}
@@ -811,7 +888,7 @@ $( function() {
 	else if( window.ncrypt_paste )
 	{
 		paste = window.ncrypt_paste;
-		if( typeof( window.ncrypt_paste.theme ) != 'undefined' )
+		if( 'undefined' !== typeof window.ncrypt_paste.theme )
 		{
 			editor.setOption( 'theme', window.ncrypt_paste.theme );
 		}
