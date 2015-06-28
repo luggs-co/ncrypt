@@ -106,7 +106,7 @@ OptionParser.new do |o|
 	o.on('-u', '--url URL', "Retrieve paste from url (conflicts with the posting options)") { |url| opts[:url] = URI(url) }
 	o.on('-f', '--file FILENAME', "Upload file") { |fn| opts[:fn] = fn }
 	o.on('-m', '--mime MIMETYPE', "Specify mime type for paste") { |mime| opts[:mime] = mime }
-	o.on('-t', '--ttl TTL', "Specify Time-To-Live for paste in seconds, default one week (-1 for indefinately)") { |ttl| opts[:ttl] = ttl }
+	o.on('-t', '--ttl TTL', "Specify Time-To-Live for paste in seconds, default one week (-1 for indefinately, -100 for one time only)") { |ttl| opts[:ttl] = ttl }
 	o.on('-p', '--password[PASSWORD]', "Use password protection on server side (no additional encryption)") { |password|
 		opts[:pass] = true
 		opts[:password] = password unless password.nil?
