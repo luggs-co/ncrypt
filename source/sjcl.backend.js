@@ -132,8 +132,6 @@ sjcl.beware["CBC mode is dangerous because it doesn't protect message integrity.
 		return magic.concat(salt, cipher);
 	}
 
-
-
 	var b = {
 		decrypt: function(key, block, cipher, options) {
 			block = sjcl.codec.base64.toBits(block);

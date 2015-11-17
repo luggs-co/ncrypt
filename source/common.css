@@ -256,7 +256,7 @@ input.tool-button:checked + label
 	right: 10px;
 	bottom: 5px;
 
-	font-size: 1em; /* set size here */
+	font-size: 1em;
 
 	line-height: 1;
 	padding: 0.125em 0 0.175em 0.55em;
@@ -267,7 +267,7 @@ input.tool-button:checked + label
 {
 	background: transparent;
 	border-radius: 50%;
-	box-shadow: inset 0 0 1px rgba(0,0,0,0.75);
+	box-shadow: inset 0 0 1px rgba( 0, 0, 0, 0.75 );
 	display: inline-block;
 	height: 0.6em;
 	width:  0.6em;

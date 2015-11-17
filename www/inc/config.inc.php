@@ -5,84 +5,91 @@
 	$__config = [
 		'domain' => $_SERVER['SERVER_NAME'],
 		'ip' => $_SERVER['SERVER_ADDR'],
-	
+
 		'database' => [
 			'host' => 'localhost',
 			'username' => 'username',
 			'password' => 'password',
 			'db' => 'ncrypt',
 		],
-		
+
 		'paste' => [
 			'secret' => '', // set this if you want unidentifiable alphaIds (not really secure)
+			'attachments' => [
+				'max_size' => ( 2 * 1024 * 1024 ), // 2MB largest file size (not used yet)
+			],
 		],
 
 		'site' => [
 			'url' => '/',
 			'name' => 'NCrypt',
+			'version' => 'v0.7.40',
 			'source' => 'https://github.com/luggs-co/ncrypt',
 			'contact' => 'mailto:contact@ncry.pt',
+			'attachments' => [
+				'enabled' => true,
+			],
 		],
 
-		'scripturl' => 'https://ncry.pt',
-		// 'scripturl' => ( isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'],
+		//'scripturl' => 'https://ncry.pt',
+		'scripturl' => ( isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'],
 	];
-	
+
 	$year = gmdate('Y');
-	
+
 	$__config['site']['footer'] = <<<EOD
 		$year ncry.pt
 		<span class="small">&nbsp;&diams;&nbsp;</span>
-		<a href="mailto:contact@ncry.pt">Contact</a>
+		<a href="{$__config['site']['contact']}">Contact</a>
 EOD;
 
 	$__config['mime-types'] = [
 		'Common Formats',
-			[ 'text/plain'			  , 'Plain Text' ],
-			[ 'application/x-aspx'	  , 'ASP.NET' ],
-			[ 'text/x-bash'			 , 'Bash' ],
-			[ 'text/x-csrc'			 , 'C' ],
-			[ 'text/x-c++src'		   , 'C++' ],
-			[ 'text/x-csharp'		   , 'C#' ],
-			[ 'text/x-java'			 , 'Java' ],
+			[ 'text/plain'				, 'Plain Text' ],
+			[ 'application/x-aspx'		, 'ASP.NET' ],
+			[ 'text/x-bash'				, 'Bash' ],
+			[ 'text/x-csrc'				, 'C' ],
+			[ 'text/x-c++src'			, 'C++' ],
+			[ 'text/x-csharp'			, 'C#' ],
+			[ 'text/x-java'				, 'Java' ],
 			[ 'text/css'				, 'CSS' ],
-			[ 'htmlmixed'			   , 'HTML mixed-mode' ],
-			[ 'text/javascript'		 , 'JavaScript' ],
-			[ 'text/x-perl'			 , 'Perl' ],
-			[ 'application/x-httpd-php' , 'PHP' ],
-			[ 'text/x-python'		   , 'Python' ],
-			[ 'text/x-ruby'			 , 'Ruby' ],
+			[ 'htmlmixed'				, 'HTML mixed-mode' ],
+			[ 'text/javascript'			, 'JavaScript' ],
+			[ 'text/x-perl'				, 'Perl' ],
+			[ 'application/x-httpd-php'	, 'PHP' ],
+			[ 'text/x-python'			, 'Python' ],
+			[ 'text/x-ruby'				, 'Ruby' ],
 			[ 'text/x-plsql'			, 'SQL' ],
-			[ 'application/xml'		 , 'XML' ],
+			[ 'application/xml'			, 'XML' ],
 		'Other Formats',
-			[ 'text/x-clojure'		  , 'Clojure' ],
-			[ 'text/x-coffeescript'	 , 'CoffeeScript' ],
-			[ 'text/x-diff'			 , 'diff' ],
-			[ 'text/x-eiffel'		   , 'Eiffel' ],
-			[ 'text/x-groovy'		   , 'Groovy' ],
-			[ 'text/x-haskell'		  , 'Haskell' ],
-			[ 'text/html'			   , 'HTML embedded scripts' ],
-			[ 'application/x-jsp'	   , 'JavaServer Pages' ],
+			[ 'text/x-clojure'			, 'Clojure' ],
+			[ 'text/x-coffeescript'		, 'CoffeeScript' ],
+			[ 'text/x-diff'				, 'diff' ],
+			[ 'text/x-eiffel'			, 'Eiffel' ],
+			[ 'text/x-groovy'			, 'Groovy' ],
+			[ 'text/x-haskell'			, 'Haskell' ],
+			[ 'text/html'				, 'HTML embedded scripts' ],
+			[ 'application/x-jsp'		, 'JavaServer Pages' ],
 			[ 'application/json'		, 'JSON' ],
-			[ 'jinja2'				  , 'Jinja2' ],
-			[ 'text/less'			   , 'LESS' ],
-			[ 'text/x-lua'			  , 'Lua' ],
-			[ 'text/x-markdown'		 , 'Markdown' ],
-			[ 'text/n-triples'		  , 'NTriples' ],
-			[ 'text/x-pascal'		   , 'Pascal' ],
-			[ 'text/x-rsc'			  , 'R' ],
-			[ 'text/x-rst'			  , 'reStructuredText' ],
-			[ 'text/x-rust'			 , 'Rust' ],
-			[ 'text/x-scheme'		   , 'Scheme' ],
+			[ 'jinja2'					, 'Jinja2' ],
+			[ 'text/less'				, 'LESS' ],
+			[ 'text/x-lua'				, 'Lua' ],
+			[ 'text/x-markdown'			, 'Markdown' ],
+			[ 'text/n-triples'			, 'NTriples' ],
+			[ 'text/x-pascal'			, 'Pascal' ],
+			[ 'text/x-rsc'				, 'R' ],
+			[ 'text/x-rst'				, 'reStructuredText' ],
+			[ 'text/x-rust'				, 'Rust' ],
+			[ 'text/x-scheme'			, 'Scheme' ],
 			[ 'text/x-stsrc'			, 'Smalltalk' ],
-			[ 'application/sparql'	  , 'SPARQL' ],
-			[ 'text/x-stex'			 , 'sTeX, LaTeX' ],
-			[ 'text/x-tiddlywiki'	   , 'Tiddlywiki' ],
-			[ 'text/velocity'		   , 'Velocity' ],
-			[ 'text/x-verilog'		  , 'Verilog' ],
-			[ 'text/x-yaml'			 , 'YAML' ],
+			[ 'application/sparql'		, 'SPARQL' ],
+			[ 'text/x-stex'				, 'sTeX, LaTeX' ],
+			[ 'text/x-tiddlywiki'		, 'Tiddlywiki' ],
+			[ 'text/velocity'			, 'Velocity' ],
+			[ 'text/x-verilog'			, 'Verilog' ],
+			[ 'text/x-yaml'				, 'YAML' ],
 	];
-	
+
 	$__config['code-themes'] = [
 		"default",
 		"3024-day",
@@ -121,7 +128,7 @@ EOD;
 		"xq-light",
 		"zenburn",
 	];
-	
+
 	$__config['bitcoin-addresses'] = [
 		'1NCrypt1VFFWxa2ambbQqbeyaBfcjKQQKc',
 		'1NCrypts6Jr31whfqEyhX9ChGGDfocv9mi',
@@ -138,10 +145,10 @@ EOD;
 		'1NCryptTtRXmrWh6qWC9ho8q4p7EXcaz8Q',
 		'1NCrypt5zbxwBmyyvMrVZr4x4n2NBBPNr8',
 	];
-	
+
 	if( file_exists( __DIR__ . '/config-local.inc.php' ) )
 	{
 		require_once __DIR__ . '/config-local.inc.php';
 	}
-	
+
 	function get_config() { global $__config; return $__config; }

@@ -31,7 +31,7 @@
 				<input type="hidden" id="new_cipher" value="AES-256-OFB" />
 				<input type="file" id="upload_file" style="display: none;" />
 				<span style="float: right; white-space: nowrap;">
-					<input type="button" id="upload" value="Upload File" />
+					<?php if( true === $site_attachments['enabled'] ) { ?><input type="button" id="upload" value="Upload File" /><?php } ?>
 					<input type="button" id="en" value="Generating key..." disabled />
 				</span>
 			</div>

@@ -8,6 +8,8 @@
  * - added code color themes
  * - added use of cookies to remember user preferences (theme,fullscreen,linenumbers,linewrap)
  * - upload file now shows preview, use submit to upload to server
+ * - basic upload/download progress indicators
+ * -
  *
  * @version: 0.4
  * @author: NovaKing (novaking@eztv.se)
@@ -111,15 +113,19 @@ $( function() {
 	function formatSizeUnits( bytes )
 	{
 		var thresh = 1024;
-		if(Math.abs(bytes) < thresh) {
+		if( Math.abs( bytes ) < thresh )
+		{
 			return bytes + ' B';
 		}
 		var units = [ 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB' ];
 		var u = -1;
-		do {
+
+		do
+		{
 			bytes /= thresh;
 			++u;
-		} while( Math.abs( bytes ) >= thresh && u < units.length - 1 );
+		}
+		while( Math.abs( bytes ) >= thresh && u < units.length - 1 );
 
 		return bytes.toFixed( 2 ) + ' ' + units[u];
 	}
@@ -428,6 +434,7 @@ $( function() {
 	var delayedEncryptionInProgress = null;
 	var encryptionInProgress = 0; // 0: not in progress; 1: in progress; 2: in progress, but don't use result, restart instead
 	var _encryptResult = false;
+	var maxEncryptedDisplay = 2650;
 
 	function encrypt_finished( cb )
 	{
@@ -498,7 +505,7 @@ $( function() {
 				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
 				$( '#new_encrypting' ).hide();
 				$( '#new_result' ).val( result );
-				$( '#new_preview' ).val( result.substring( 0, 2650 ) );
+				$( '#new_preview' ).val( result.substring( 0, maxEncryptedDisplay ) );
 			}
 
 			var i, len, l = progress ? _encrypt_finished.slice() : _encrypt_finished.splice( 0 );
@@ -565,7 +572,7 @@ $( function() {
 				$( '#new_encrypting' ).hide();
 				$( '#new_encrypttime' ).html( 'encryption: ' + t.getDiff() + 'ms');
 				$( '#new_result' ).val( data );
-				$( '#new_preview' ).val( stringBreak( data.substring( 0, 2600 ), 96 ) );
+				$( '#new_preview' ).val( stringBreak( data.substring( 0, maxEncryptedDisplay ), 96 ) );
 			} );
 		};
 
@@ -597,8 +604,9 @@ $( function() {
 		console.log( e );
 		if( e.lengthComputable )
 		{
-			$( '#upload-progress' ).val( ( e.loaded / e.total * 100 ) );
-			$( '#upload-stats' ).html( e.loaded + " of " + e.total + " (" + ( e.loaded / e.total * 100 ) + "%)" );
+			var per = formatPercent( e.loaded, e.total );
+			$( '#upload-progress' ).val( per );
+			$( '#upload-stats' ).html( formatSizeUnits( e.loaded ) + " of " + formatSizeUnits( e.total ) + " (" + per + "%)" );
 		}
 	}
 
