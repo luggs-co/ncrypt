@@ -23,6 +23,7 @@
 				pastes
 			WHERE
 				ttl != -1 AND
+				ttl != -100 AND
 				(EXTRACT(EPOCH FROM now()) - added ) > ttl
 			';
 

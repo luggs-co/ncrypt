@@ -25,6 +25,7 @@
 				pastes
 			WHERE
 				ttl != -1 AND
+				ttl != -100 AND
 				( UNIX_TIMESTAMP() - added ) > ttl
 			';
 
