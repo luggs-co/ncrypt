@@ -3,8 +3,8 @@
 	require_once __DIR__ . '/db.inc.php';
 
 	$__config = [
-		'domain' => $_SERVER['SERVER_NAME'],
-		'ip' => $_SERVER['SERVER_ADDR'],
+		'domain' => (is_cli()) ? 'cli' : $_SERVER['SERVER_NAME'],
+		'ip' => (is_cli()) ? '127.0.0.1' : $_SERVER['SERVER_ADDR'],
 
 		'database' => [
 			'host' => 'localhost',
@@ -23,7 +23,7 @@
 		'site' => [
 			'url' => '/',
 			'name' => 'NCrypt',
-			'version' => 'v0.7.40',
+			'version' => 'v0.7.50',
 			'source' => 'https://github.com/luggs-co/ncrypt',
 			'contact' => 'mailto:contact@ncry.pt',
 			'attachments' => [
@@ -32,7 +32,7 @@
 		],
 
 		//'scripturl' => 'https://ncry.pt',
-		'scripturl' => ( isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'],
+		'scripturl' => (is_cli()) ? 'cli' : ( isset( $_SERVER['HTTPS'] ) ? 'https://' : 'http://' ) . $_SERVER['HTTP_HOST'],
 	];
 
 	$year = gmdate('Y');

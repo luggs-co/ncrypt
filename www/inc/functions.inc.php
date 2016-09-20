@@ -61,7 +61,7 @@
 		$__conf = get_config();
 		$index = 'abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$i = array( 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' );
-	
+
 		if( !empty( $__conf['paste']['secret'] ) )
 		{
 			// Although this function's purpose is to just make the
@@ -73,21 +73,21 @@
 			{
 				$i[] = substr( $index, $n, 1 );
 			}
-		 
+
 			$passhash = hash( 'sha256', $__conf['paste']['secret'] );
 			$passhash = ( strlen( $passhash ) < strlen( $index ) ) ? hash( 'sha512', $__conf['paste']['secret'] ) : $passhash;
-		 
+
 			for( $n = 0; $n < strlen( $index ); $n++ )
 			{
 				$p[] =	substr( $passhash, $n, 1 );
 			}
-		 
+
 			array_multisort( $p, SORT_DESC, $i );
 			$index = implode( $i );
 		}
-		
+
 		$base = strlen( $index );
-	
+
 		if( $to_num )
 		{
 			// Digital number <<-- alphabet letter code
@@ -99,7 +99,7 @@
 				$bcpow = bcpow( $base, $len - $t );
 				$out += strpos( $index, $in[$t] ) * $bcpow;
 			}
-	
+
 			if( is_numeric( $pad_up ) )
 			{
 				$pad_up--;
@@ -120,7 +120,7 @@
 					$in += pow( $base, $pad_up );
 				}
 			}
-	
+
 			$out = '';
 			for( $t = floor( log10( $in ) / log10( $base ) ); $t >= 0; $t-- )
 			{
@@ -131,10 +131,19 @@
 			}
 			$out = strrev( $out ); // reverse
 		}
-	
+
 		return $out;
 	}
 
+	function is_cli()
+	{
+		if( defined( 'STDIN' ) ) return true;
+		if( php_sapi_name() === 'cli' ) return true;
+		if( array_key_exists( 'SHELL', $_ENV ) ) return true;
+		if( empty( $_SERVER['REMOTE_ADDR'] ) && !isset( $_SERVER['HTTP_USER_AGENT'] ) && count( @$_SERVER['argv'] ) > 0 ) return true;
+		if( !array_key_exists( 'REQUEST_METHOD', $_SERVER ) ) return true;
+		return false;
+	}
 
 	function POST($key, $default = '') {
 		if (isset($_POST[$key])) return $_POST[$key];

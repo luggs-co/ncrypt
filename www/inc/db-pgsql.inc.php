@@ -15,6 +15,22 @@
 		return $db;
 	}
 
+	function db_backend_prune($db)
+	{
+		// grab all pastes from database
+		$sql = '
+			DELETE FROM
+				pastes
+			WHERE
+				ttl != -1 AND
+				(EXTRACT(EPOCH FROM now()) - added ) > ttl
+			';
+
+		$res = pg_query($db, $sql)  or die("Failed to execute query '$sql'");
+
+		return pg_affected_rows($res);
+	}
+
 	function db_backend_get($db, $id)
 	{
 		// grab paste from database

@@ -24,6 +24,13 @@
 		return $__db;
 	}
 
+	function db_prune()
+	{
+		$db = db_connection();
+
+		return db_backend_prune( $db );
+	}
+
 	// returns assoc array (id,added,ttl,password) with additional entry age => time() - added
 	// doesn't need to include data,syntax,crypto
 	function db_get($id)

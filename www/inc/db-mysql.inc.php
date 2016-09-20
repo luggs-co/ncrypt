@@ -12,9 +12,26 @@
 			die( 'Unable to connect to db node server' );
 		}
 
-		$db->query( 'SET NAMES utf32;' );
+		$db->query( 'SET NAMES utf8mb4;' );
 
 		return $db;
+	}
+
+	function db_backend_prune($db)
+	{
+		// delete all pastes from database that have expired
+		$sql = '
+			DELETE FROM
+				pastes
+			WHERE
+				ttl != -1 AND
+				( UNIX_TIMESTAMP() - added ) > ttl
+			';
+
+		$stmt = $db->prepare($sql);
+		$stmt->execute();
+
+		return $db->affected_rows;
 	}
 
 	function db_backend_get($db, $id)
