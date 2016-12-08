@@ -8,7 +8,7 @@ trap 'rm -rf "${tmpdir}"' EXIT
 (
 	cd "source"
 	# assume folder names are "sane"
-	for d in $(find "CodeMirror/mode" -mindepth 1 -type d); do
+	for d in $(find "CodeMirror/mode" -mindepth 1 -type d | sort); do
 		mode=$(basename "${d}")
 		f="${d}/${mode}.js"
 		if [ -e "${f}" ]; then

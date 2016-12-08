@@ -59,16 +59,16 @@ findjs() {
 	done
 	printf '\t\t\t\tfunction() {'
 	printf '\n\t\t\t\t\thead.load(\n'
-	
+
 	first=1
-	for s in codemirror-simple jquery.textchange; do
+	for s in codemirror-simple codemirror-overlay jquery.textchange; do
 		printf '\t\t\t\t\t\t"'
 		findjs "jslibs/${s}"
 		printf '",\n'
 	done
 	printf '\t\t\t\t\t\tfunction() {'
 	printf '\n\t\t\t\t\t\t\thead.load(\n'
-	
+
 	first=1
 	for s in codemirror-modes main; do
 		if [ 0 -eq "${first}" ]; then printf ',\n'; fi
@@ -77,7 +77,7 @@ findjs() {
 		printf '"'
 		first=0
 	done
-	
+
 	printf '\n\t\t\t\t\t\t\t);'
 	printf '\n\t\t\t\t\t\t}'
 	printf '\n\t\t\t\t\t);'

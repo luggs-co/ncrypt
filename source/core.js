@@ -347,6 +347,9 @@ $( function() {
 					}
 				}
 
+				// force the editor to refresh (Fixes github issue #2)
+				editor.refresh();
+
 				if( blob )
 				{
 					$( '#saveas' ).show().on( 'click', function() {

@@ -19,6 +19,7 @@ js-codemirror-modes:
 js-codemirror:
 	./develop/js-sha1-versioned.sh www/jslibs/codemirror - < source/CodeMirror/lib/codemirror.js
 	./develop/js-sha1-versioned.sh www/jslibs/codemirror-simple - < source/CodeMirror/addon/mode/simple.js
+	./develop/js-sha1-versioned.sh www/jslibs/codemirror-overlay - < source/CodeMirror/addon/mode/overlay.js
 
 js-tpl: $(JAVASCRIPTS)
 	./develop/make-javascripts-tpl.sh
