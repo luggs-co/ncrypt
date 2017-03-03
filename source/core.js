@@ -836,7 +836,7 @@ $( function() {
 
 		$( '#clone' ).on( 'click', function() {
 			set_new_syntax( paste.syntax );
-			$( '#new_text' ).html( editor.getValue() ).trigger( 'textchange' );
+			$( '#new_text' ).val( editor.getValue() ).trigger( 'textchange' );
 			$( '#newpaste' ).slideDown();
 		} );
 
