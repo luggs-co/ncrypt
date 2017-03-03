@@ -23,7 +23,7 @@
 		'site' => [
 			'url' => '/',
 			'name' => 'NCrypt',
-			'version' => 'v0.7.60',
+			'version' => 'v0.7.61',
 			'source' => 'https://github.com/luggs-co/ncrypt',
 			'contact' => 'mailto:contact@ncry.pt',
 			'attachments' => [
